@@ -1,3 +1,7 @@
 spring:
   application:
     name: algotrading
+
+saxo:
+  base-url: ${SAXO_BASE_URL}
+  access-token: ${SAXO_ACCESS_TOKEN}
