@@ -1,5 +1,8 @@
 package dk.ksp.algotrading.client
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import dk.ksp.algotrading.dto.response.QuoteDataResponseDTO
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.net.URI
@@ -9,42 +12,25 @@ import java.net.http.HttpResponse
 
 @Component
 class MarketDataClient(
-
-    @Value("\${saxo.base-url}")
+    @Value("\${finnhub.base-url}")
     private val baseUrl: String,
-
-    @Value("\${saxo.access-token}")
-    private val accessToken: String
+    @Value("\${finnhub.api-key}")
+    private val apiKey: String
 ) {
+    private val client = HttpClient.newHttpClient()
+    private val objectMapper = jacksonObjectMapper()
 
-    private val client =
-        HttpClient.newHttpClient()
+    fun fetchRealTimeQuoteData(symbol: String): QuoteDataResponseDTO {
 
-    fun fetchInstruments(): String {
+        val request = HttpRequest
+            .newBuilder()
+            .uri(URI.create("$baseUrl/quote?symbol=$symbol"))
+            .header("X-Finnhub-Token", apiKey)
+            .GET()
+            .build()
 
-        val request =
-            HttpRequest
-                .newBuilder()
-                .uri(
-                    URI.create(
-                        "$baseUrl/ref/v1/instruments?KeyWords=DKK&AssetTypes=FxSpot"
-                    )
-                )
-                .header(
-                    "Authorization",
-                    "Bearer $accessToken"
-                )
-                .GET()
-                .build()
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
 
-        val response =
-            client.send(
-                request,
-                HttpResponse.BodyHandlers.ofString()
-            )
-
-        println("status code: " + response.statusCode())
-
-        return response.body()
+        return objectMapper.readValue<QuoteDataResponseDTO>(response.body())
     }
 }

@@ -8,10 +8,9 @@ import org.springframework.stereotype.Service
 class StockPriceService(
     private val marketDataClient: MarketDataClient
 ) {
-    @Scheduled(initialDelay = 10_000)
-    fun fetchPrices() {
-        val result = marketDataClient.fetchInstruments()
-
+    @Scheduled(fixedDelay = 5_000)
+    fun fetchStockPrices() {
+        val appleStockPrice = marketDataClient.fetchRealTimeQuoteData("AAPL")
 
     }
 }
