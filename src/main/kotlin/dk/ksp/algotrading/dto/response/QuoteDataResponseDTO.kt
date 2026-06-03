@@ -1,29 +1,30 @@
 package dk.ksp.algotrading.dto.response
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import java.math.BigDecimal
 
 data class QuoteDataResponseDTO(
 
     @JsonProperty("c")
-    val currentPrice: Double,
+    val currentPrice: BigDecimal,
 
     @JsonProperty("d")
-    val change: Double,
+    val change: BigDecimal,
 
     @JsonProperty("dp")
-    val percentChange: Double,
+    val percentChange: BigDecimal,
 
     @JsonProperty("h")
-    val highPrice: Double,
+    val highPrice: BigDecimal,
 
     @JsonProperty("l")
-    val lowPrice: Double,
+    val lowPrice: BigDecimal,
 
     @JsonProperty("o")
-    val openPrice: Double,
+    val openPrice: BigDecimal,
 
     @JsonProperty("pc")
-    val previousClosePrice: Double,
+    val previousClosePrice: BigDecimal,
 
     @JsonProperty("t")
     val timestamp: Long,
