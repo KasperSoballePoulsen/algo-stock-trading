@@ -5,3 +5,6 @@ spring:
 finnhub:
   base-url: ${FINNHUB_BASE_URL}
   api-key: ${FINNHUB_API_KEY}
+
+ntfy:
+  stock-topic-name: ${NTFY_STOCK_TOPIC_NAME}

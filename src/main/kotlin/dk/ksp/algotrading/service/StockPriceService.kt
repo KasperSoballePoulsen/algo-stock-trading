@@ -1,6 +1,7 @@
 package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.MarketDataClient
+import dk.ksp.algotrading.client.NotificationClient
 import dk.ksp.algotrading.entity.StockPrice
 import dk.ksp.algotrading.mapper.toStockPrice
 import org.springframework.scheduling.annotation.Scheduled
@@ -9,11 +10,14 @@ import org.springframework.stereotype.Service
 @Service
 class StockPriceService(
     private val marketDataClient: MarketDataClient,
+    private val notificationClient: NotificationClient
 ) {
-    @Scheduled(fixedDelay = 5_000)
+    @Scheduled(fixedDelay = 10_000)
     fun fetchStockPrices() {
-        val appleStockPrice = marketDataClient.fetchRealTimeQuoteData("AAPL").toStockPrice()
+//        val applStockPrice = marketDataClient.fetchRealTimeQuoteData("AAPL").toStockPrice()
+        val astsStockPrice = marketDataClient.fetchRealTimeQuoteData("ASTS").toStockPrice("ASTS")
 
 
+        notificationClient.sendNotification("${astsStockPrice.symbol}: ${astsStockPrice.percentChange}%", "stocks")
     }
 }

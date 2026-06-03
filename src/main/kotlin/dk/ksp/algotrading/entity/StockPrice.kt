@@ -15,6 +15,7 @@ class StockPrice(
     val lowPrice: BigDecimal,
     val openPrice: BigDecimal,
     val previousClosePrice: BigDecimal,
+    val symbol: String,
     @Id
     val timestamp: Long,
 )
