@@ -1,6 +1,6 @@
 package dk.ksp.algotrading.dto.request
 
-data class CreateTraderRequestDTO(
+data class CreateStockTraderRequestDTO(
     val username: String
 )
 

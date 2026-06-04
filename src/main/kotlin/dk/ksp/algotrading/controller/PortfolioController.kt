@@ -1,6 +1,6 @@
 package dk.ksp.algotrading.controller
 
-import dk.ksp.algotrading.dto.request.AddStockRequestDTO
+import dk.ksp.algotrading.dto.request.AddStockHoldingRequestDTO
 import dk.ksp.algotrading.service.PortfolioService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -10,18 +10,17 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/traders/{username}/stocks")
+@RequestMapping("/api/stock-traders/{username}/stocks")
 class PortfolioController(
     private val portfolioService: PortfolioService
 ) {
 
     @PostMapping
-    fun addStockToPortfolio(@PathVariable username: String, @RequestBody request: AddStockRequestDTO) {
-        portfolioService.addStockToPortfolio(username, request.symbol)
+    fun addStockHolding(@PathVariable username: String, @RequestBody request: AddStockHoldingRequestDTO) {
+        portfolioService.addStockHolding(username, request.symbol, request.quantity)
     }
 
     @DeleteMapping("/{symbol}")
-    fun removeStockFromPortfolio(@PathVariable username: String, @PathVariable symbol: String) {
-//        portfolioService.removeStockFromPortfolio(username, symbol)
+    fun removeStockHolding(@PathVariable username: String, @PathVariable symbol: String) {
     }
 }

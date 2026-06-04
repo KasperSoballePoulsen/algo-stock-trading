@@ -5,6 +5,10 @@ spring:
     url: jdbc:postgresql://localhost:8001/algotrading
     username: postgres
     password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
 finnhub:
   base-url: ${FINNHUB_BASE_URL}

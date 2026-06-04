@@ -12,9 +12,8 @@ class StockPriceService(
     private val marketDataClient: MarketDataClient,
     private val notificationClient: NotificationClient
 ) {
-    @Scheduled(fixedDelay = 10_000)
+
     fun fetchStockPrices() {
-//        val applStockPrice = marketDataClient.fetchRealTimeQuoteData("AAPL").toStockPrice()
         val astsStockPrice = marketDataClient.fetchRealTimeQuoteData("ASTS").toStockPrice("ASTS")
 
 
