@@ -1,6 +1,10 @@
 spring:
   application:
     name: algotrading
+  datasource:
+    url: jdbc:postgresql://localhost:8001/algotrading
+    username: postgres
+    password: ${POSTGRES_PASSWORD}
 
 finnhub:
   base-url: ${FINNHUB_BASE_URL}
