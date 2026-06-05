@@ -2,8 +2,10 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.MarketDataClient
 import dk.ksp.algotrading.client.NotificationClient
+import dk.ksp.algotrading.dto.request.StockOrderDTO
 import dk.ksp.algotrading.dto.response.StockTraderWithPortfolioDTO
 import dk.ksp.algotrading.entity.StockHolding
+import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.mapper.toStockPrice
 import dk.ksp.algotrading.mapper.toStockTraderWithPortfolioDTO
 import dk.ksp.algotrading.repository.StockHoldingRepository
@@ -25,7 +27,12 @@ class PortfolioService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
 
-    fun createOrder() {
+    @Transactional
+    fun createOrder(username: String, symbol: String, quantity: Long, price: BigDecimal, type: OrderType): StockOrderDTO {
+        when (type) {
+            OrderType.BUY -> addStockHolding(username, symbol, quantity)
+            OrderType.SELL ->
+        }
 
     }
 

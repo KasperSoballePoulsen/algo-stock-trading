@@ -19,8 +19,8 @@ class PortfolioController(
     fun createOrder(
         @PathVariable username: String,
         @RequestBody request: StockOrderDTO
-    ): StockTraderWithPortfolioDTO {
-        return portfolioService.createOrder()
+    ): StockOrderDTO {
+        return portfolioService.createOrder(username, request.symbol, request.quantity, request.price, request.type)
     }
 
 
