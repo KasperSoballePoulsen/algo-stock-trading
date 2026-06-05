@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
 interface StockTraderRepository : JpaRepository<StockTrader, Long> {
+
     fun findByUsername(username: String): StockTrader?
 
     @Query(
