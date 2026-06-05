@@ -24,8 +24,14 @@ class PortfolioService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Transactional
-    fun addStockHolding(username: String, symbol: String, quantity: Long): StockTraderWithPortfolioDTO {
+
+    fun createOrder() {
+
+    }
+
+
+
+    private fun addStockHolding(username: String, symbol: String, quantity: Long): StockTraderWithPortfolioDTO {
 
         val stockTrader = stockTraderRepository.findByUsernameWithPortfolio(username)
             ?: throw IllegalArgumentException("Trader not found")
@@ -48,8 +54,7 @@ class PortfolioService(
         return stockTrader.toStockTraderWithPortfolioDTO()
     }
 
-    @Transactional
-    fun removeStockHolding(username: String, symbol: String, quantity: Long): StockTraderWithPortfolioDTO {
+    private fun removeStockHolding(username: String, symbol: String, quantity: Long): StockTraderWithPortfolioDTO {
 
         val stockTrader = stockTraderRepository.findByUsernameWithPortfolio(username)
             ?: throw IllegalArgumentException("Trader not found")
@@ -79,6 +84,7 @@ class PortfolioService(
         return stockTrader.toStockTraderWithPortfolioDTO()
     }
 
+    //    @Scheduled(initialDelay = 5_000)
     @Scheduled(cron = "0 0 22 * * MON-FRI", zone = "Europe/Copenhagen")
     fun calculatePortfolioDailyPercentChange() {
         val stockTraders = stockTraderRepository.findAll()
@@ -124,7 +130,7 @@ class PortfolioService(
 
         val message = portfolioChanges.joinToString("\n")
 
-        notificationClient.sendNotification(message, "Portfolio total percent change")
+        notificationClient.sendNotification(message, "Portfolio Daily Change")
     }
 
 }
