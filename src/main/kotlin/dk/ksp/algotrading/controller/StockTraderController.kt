@@ -1,6 +1,7 @@
 package dk.ksp.algotrading.controller
 
-import dk.ksp.algotrading.dto.request.CreateStockTraderRequestDTO
+import dk.ksp.algotrading.dto.request.CreateStockTraderDTO
+import dk.ksp.algotrading.dto.response.StockTraderDTO
 import dk.ksp.algotrading.service.StockTraderService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -16,11 +17,12 @@ class StockTraderController(
 ) {
 
     @PostMapping
-    fun createStockTrader(@RequestBody request: CreateStockTraderRequestDTO) {
-        stockTraderService.createStockTrader(request.username)
+    fun createStockTrader(@RequestBody request: CreateStockTraderDTO): StockTraderDTO {
+        return stockTraderService.createStockTrader(request.username)
     }
 
     @DeleteMapping("/{username}")
-    fun deleteStockTrader(@PathVariable username: String) {
+    fun deleteStockTrader(@PathVariable username: String): StockTraderDTO {
+        return stockTraderService.removeStockTrader(username)
     }
 }

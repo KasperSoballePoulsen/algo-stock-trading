@@ -22,11 +22,7 @@ class NotificationClient(
             .POST(HttpRequest.BodyPublishers.ofString(message))
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-        if (response.statusCode() != 200) {
-            println("Fail")
-        } else {
-            println("Success")
-        }
+        client.send(request, HttpResponse.BodyHandlers.ofString())
+
     }
 }

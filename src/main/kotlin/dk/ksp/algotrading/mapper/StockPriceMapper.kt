@@ -1,18 +1,18 @@
 package dk.ksp.algotrading.mapper
 
-import dk.ksp.algotrading.dto.response.QuoteDataResponseDTO
+import dk.ksp.algotrading.dto.response.QuoteDataDTO
 import dk.ksp.algotrading.entity.StockPrice
 
-fun QuoteDataResponseDTO.toStockPrice(symbol: String): StockPrice =
+fun QuoteDataDTO.toStockPrice(symbol: String) =
     StockPrice(
-        currentPrice = currentPrice,
-        change = change,
-        percentChange = percentChange,
-        highPrice = highPrice,
-        lowPrice = lowPrice,
-        openPrice = openPrice,
-        previousClosePrice = previousClosePrice,
-        timestamp = timestamp,
-        symbol = symbol
+        currentPrice,
+        change,
+        percentChange,
+        highPrice,
+        lowPrice,
+        openPrice,
+        previousClosePrice,
+        symbol,
+        timestamp
     )
 

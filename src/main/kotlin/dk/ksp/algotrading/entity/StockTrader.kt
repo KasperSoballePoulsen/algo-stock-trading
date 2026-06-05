@@ -1,5 +1,6 @@
 package dk.ksp.algotrading.entity
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -19,7 +20,11 @@ class StockTrader(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @OneToMany(mappedBy = "trader")
+    @OneToMany(
+        mappedBy = "trader",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
+    )
     val portfolio: MutableList<StockHolding> = mutableListOf()
 )
 

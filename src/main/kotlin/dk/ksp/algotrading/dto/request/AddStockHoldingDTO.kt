@@ -1,6 +1,6 @@
 package dk.ksp.algotrading.dto.request
 
-data class AddStockHoldingRequestDTO(
+data class AddStockHoldingDTO(
     val symbol: String,
     val quantity: Long
 )

@@ -3,7 +3,7 @@ package dk.ksp.algotrading.dto.response
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal
 
-data class QuoteDataResponseDTO(
+data class QuoteDataDTO(
 
     @JsonProperty("c")
     val currentPrice: BigDecimal,
