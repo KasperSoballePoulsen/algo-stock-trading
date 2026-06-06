@@ -42,6 +42,5 @@ class MarketDataClient(
         } catch (e: Exception) {
             throw MarketDataException("Failed to fetch quote for symbol=$symbol", e)
         }
-
     }
 }

@@ -8,7 +8,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
 
 finnhub:
   base-url: ${FINNHUB_BASE_URL}

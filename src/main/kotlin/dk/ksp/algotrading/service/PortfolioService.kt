@@ -2,11 +2,13 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.MarketDataClient
 import dk.ksp.algotrading.client.NotificationClient
-import dk.ksp.algotrading.dto.response.StockTraderWithPortfolioDTO
 import dk.ksp.algotrading.entity.StockHolding
+import dk.ksp.algotrading.entity.StockOrder
+import dk.ksp.algotrading.entity.StockTrader
+import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.mapper.toStockPrice
-import dk.ksp.algotrading.mapper.toStockTraderWithPortfolioDTO
 import dk.ksp.algotrading.repository.StockHoldingRepository
+import dk.ksp.algotrading.repository.StockOrderRepository
 import dk.ksp.algotrading.repository.StockTraderRepository
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
@@ -18,65 +20,59 @@ import java.math.RoundingMode
 @Service
 class PortfolioService(
     private val stockTraderRepository: StockTraderRepository,
-    private val notificationClient: NotificationClient,
     private val stockHoldingRepository: StockHoldingRepository,
-    private val marketDataClient: MarketDataClient
-) {
+    private val stockOrderRepository: StockOrderRepository,
+    private val notificationClient: NotificationClient,
+    private val marketDataClient: MarketDataClient,
+    ) {
+
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun addStockHolding(username: String, symbol: String, quantity: Long): StockTraderWithPortfolioDTO {
-
-        val stockTrader = stockTraderRepository.findByUsernameWithPortfolio(username)
-            ?: throw IllegalArgumentException("Trader not found")
-
-        val normalizedSymbol = symbol.uppercase()
-
-        val stockHolding =
-            stockTrader.portfolio
-                .find { it.symbol == normalizedSymbol }
-                ?.apply { this.quantity += quantity }
-                ?: StockHolding(stockTrader, normalizedSymbol, quantity)
-                    .also { stockTrader.portfolio.add(it) }
-
-        val stockText = if (stockHolding.quantity == 1L) "stock" else "stocks"
-
-        notificationClient.sendNotification(
-            "$username now has ${stockHolding.quantity} ${stockHolding.symbol} $stockText",
-            "Portfolio Update"
-        )
-        return stockTrader.toStockTraderWithPortfolioDTO()
+    fun completeOrderInDatabase(
+        stockTrader: StockTrader,
+        symbol: String,
+        quantity: Long,
+        price: BigDecimal,
+        type: OrderType
+    ) {
+        saveOrder(stockTrader, symbol, quantity, price, type)
+        updatePortfolio(stockTrader, symbol, quantity, type)
     }
 
-    @Transactional
-    fun removeStockHolding(username: String, symbol: String, quantity: Long): StockTraderWithPortfolioDTO {
 
-        val stockTrader = stockTraderRepository.findByUsernameWithPortfolio(username)
-            ?: throw IllegalArgumentException("Trader not found")
+    private fun updatePortfolio(
+        stockTrader: StockTrader,
+        symbol: String,
+        quantity: Long,
+        type: OrderType
+    ) {
 
         val normalizedSymbol = symbol.uppercase()
 
-        val stockHolding =
-            stockTrader.portfolio
-                .find { it.symbol == normalizedSymbol }
-                ?.apply {
-                    if (quantity > this.quantity)
-                        throw IllegalArgumentException("Cannot remove more shares than owned")
-                    this.quantity -= quantity
-                }?.also {
-                    if (it.quantity == 0L)
-                        stockTrader.portfolio.remove(it)
-                }
-                ?: throw IllegalArgumentException("$normalizedSymbol not found in portfolio")
+        val existingHolding = stockTrader.portfolio.find { it.symbol == normalizedSymbol }
 
-        val stockText = if (stockHolding.quantity == 1L) "stock" else "stocks"
+        when (type) {
+            OrderType.BUY -> {
+                if (existingHolding != null)
+                    existingHolding.quantity += quantity
+                else
+                    stockTrader.portfolio.add(StockHolding(stockTrader, normalizedSymbol, quantity))
+            }
 
-        notificationClient.sendNotification(
-            "$username now has ${stockHolding.quantity} ${stockHolding.symbol} $stockText",
-            "Portfolio Update"
-        )
+            OrderType.SELL -> {
+                if (existingHolding == null)
+                    throw IllegalArgumentException("Cannot sell shares not owned")
 
-        return stockTrader.toStockTraderWithPortfolioDTO()
+                if (existingHolding.quantity < quantity)
+                    throw IllegalArgumentException("Cannot sell more shares than owned")
+
+                existingHolding.quantity -= quantity
+
+                if (existingHolding.quantity == 0L)
+                    stockTrader.portfolio.remove(existingHolding)
+            }
+        }
     }
 
     @Scheduled(cron = "0 0 22 * * MON-FRI", zone = "Europe/Copenhagen")
@@ -124,7 +120,18 @@ class PortfolioService(
 
         val message = portfolioChanges.joinToString("\n")
 
-        notificationClient.sendNotification(message, "Portfolio total percent change")
+        notificationClient.sendNotification(message, "Portfolio Daily Change")
+    }
+
+
+    private fun saveOrder(
+        stockTrader: StockTrader,
+        symbol: String,
+        quantity: Long,
+        price: BigDecimal,
+        type: OrderType
+    ) {
+        stockOrderRepository.save(StockOrder(stockTrader, symbol, type, quantity, price))
     }
 
 }
