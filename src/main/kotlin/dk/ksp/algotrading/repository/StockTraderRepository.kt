@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query
 
 interface StockTraderRepository : JpaRepository<StockTrader, Long> {
 
-    fun findByUsername(username: String): StockTrader?
+    fun findByUsernameAndDeletedAtIsNull(username: String): StockTrader?
 
     @Query(
         """
@@ -14,7 +14,8 @@ interface StockTraderRepository : JpaRepository<StockTrader, Long> {
     FROM StockTrader st
     LEFT JOIN FETCH st.portfolio
     WHERE st.username = :username
+    AND st.deletedAt IS NULL
 """
     )
-    fun findByUsernameWithPortfolio(username: String): StockTrader?
+    fun findByUsernameAndDeletedAtIsNullWithPortfolio(username: String): StockTrader?
 }

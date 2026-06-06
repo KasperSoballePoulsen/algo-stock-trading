@@ -23,6 +23,5 @@ class NotificationClient(
             .build()
 
         client.send(request, HttpResponse.BodyHandlers.ofString())
-
     }
 }

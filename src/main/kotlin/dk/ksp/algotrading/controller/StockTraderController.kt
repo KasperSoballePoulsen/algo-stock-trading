@@ -25,8 +25,8 @@ class StockTraderController(
     }
 
     @DeleteMapping("/{username}")
-    fun deleteStockTrader(@PathVariable username: String): StockTraderDTO {
-        return stockTraderService.removeStockTrader(username)
+    fun deleteStockTrader(@PathVariable username: String) {
+        stockTraderService.deleteTrader(username)
     }
 
     @GetMapping("/{username}")
