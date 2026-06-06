@@ -1,6 +1,7 @@
 package dk.ksp.algotrading.entity
 
 import dk.ksp.algotrading.enum.OrderType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -18,18 +19,22 @@ import java.time.Instant
 class StockOrder(
 
     @ManyToOne
-    @JoinColumn(name = "trader_id")
+    @JoinColumn(name = "trader_id", nullable = false)
     val trader: StockTrader,
 
+    @Column(nullable = false)
     val symbol: String,
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     val type: OrderType,
 
     val quantity: Long,
 
+    @Column(nullable = false)
     val price: BigDecimal,
 
+    @Column(nullable = false)
     val timestamp: Instant = Instant.now(),
 
     @Id

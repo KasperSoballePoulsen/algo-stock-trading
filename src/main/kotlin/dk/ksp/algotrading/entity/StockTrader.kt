@@ -14,7 +14,7 @@ import java.time.Instant
 @Table(name = "stock_traders")
 class StockTrader(
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     val username: String,
 
     @Id
