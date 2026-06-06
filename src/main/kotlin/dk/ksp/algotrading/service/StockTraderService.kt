@@ -8,6 +8,7 @@ import dk.ksp.algotrading.mapper.toStockTraderWithPortfolioDTO
 import dk.ksp.algotrading.repository.StockTraderRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.time.LocalDateTime
 
 @Service
@@ -29,7 +30,7 @@ class StockTraderService(
             throw IllegalStateException("Cannot delete trader with holdings")
         }
 
-        trader.deletedAt = LocalDateTime.now()
+        trader.deletedAt = Instant.now()
     }
 
     fun getStockTrader(username: String): StockTraderWithPortfolioDTO {

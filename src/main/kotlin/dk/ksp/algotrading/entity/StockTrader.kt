@@ -8,7 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Entity
 @Table(name = "stock_traders")
@@ -28,6 +28,6 @@ class StockTrader(
     )
     val portfolio: MutableList<StockHolding> = mutableListOf(),
 
-    var deletedAt: LocalDateTime? = null
+    var deletedAt: Instant? = null
 )
 
