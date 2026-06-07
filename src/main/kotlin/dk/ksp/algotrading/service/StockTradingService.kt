@@ -4,6 +4,7 @@ import dk.ksp.algotrading.client.BrokerClient
 import dk.ksp.algotrading.dto.request.StockOrderResultDTO
 import dk.ksp.algotrading.entity.StockTrader
 import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.repository.StockHoldingRepository
 import dk.ksp.algotrading.repository.StockTraderRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -11,24 +12,25 @@ import java.math.BigDecimal
 @Service
 class StockTradingService(
     private val stockTraderRepository: StockTraderRepository,
+    private val stockHoldingRepository: StockHoldingRepository,
     private val portfolioService: PortfolioService,
     private val brokerClient: BrokerClient,
 ) {
 
     fun createOrder(
-        username: String,
+        stockTraderId: Long,
         symbol: String,
         quantity: Long,
         price: BigDecimal,
         type: OrderType
     ): StockOrderResultDTO {
-        val stockTrader = stockTraderRepository.findByUsernameAndDeletedAtIsNullWithPortfolio(username)
+        val stockTrader = stockTraderRepository.findByIdAndDeletedAtIsNullWithTradingAccount(stockTraderId)
             ?: throw IllegalArgumentException("Trader not found")
 
         validateOrder(stockTrader, symbol, quantity, price, type)
         val isCompleted = brokerClient.sendOrder(stockTrader, symbol, quantity, price, type)
         if (isCompleted) {
-            portfolioService.completeOrderInDatabase(stockTrader, symbol, quantity, price, type)
+            portfolioService.completeOrderInDatabase(stockTrader.tradingAccount, symbol, quantity, price, type)
         }
 
         return StockOrderResultDTO(symbol, quantity, price, type, isCompleted)
@@ -54,7 +56,7 @@ class StockTradingService(
         }
 
         if (type == OrderType.SELL) {
-            val holding = stockTrader.portfolio.find { it.symbol == symbol.uppercase() }
+            val holding = stockHoldingRepository.findByTradingAccountAndSymbol(stockTrader.tradingAccount, symbol.uppercase())
                 ?: throw IllegalArgumentException("Cannot sell shares not owned")
 
             if (holding.quantity < quantity) {

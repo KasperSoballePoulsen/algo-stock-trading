@@ -8,27 +8,19 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
 
 @Entity
-@Table(
-    name = "stock_holdings",
-    uniqueConstraints = [
-        UniqueConstraint(
-            columnNames = ["trader_id", "symbol"]
-        )
-    ]
-)
+@Table(name = "stock_holdings")
 class StockHolding(
-
-    @ManyToOne
-    @JoinColumn(name = "trader_id", nullable = false)
-    val trader: StockTrader,
 
     @Column(nullable = false)
     val symbol: String,
 
     var quantity: Long,
+
+    @ManyToOne
+    @JoinColumn(name = "trading_account_id", nullable = false)
+    val tradingAccount: StockTradingAccount,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

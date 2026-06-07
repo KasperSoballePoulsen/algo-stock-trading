@@ -18,10 +18,6 @@ import java.time.Instant
 @Table(name = "stock_orders")
 class StockOrder(
 
-    @ManyToOne
-    @JoinColumn(name = "trader_id", nullable = false)
-    val trader: StockTrader,
-
     @Column(nullable = false)
     val symbol: String,
 
@@ -34,10 +30,15 @@ class StockOrder(
     @Column(nullable = false)
     val price: BigDecimal,
 
+    @ManyToOne
+    @JoinColumn(name = "trading_account_id", nullable = false)
+    val tradingAccount: StockTradingAccount,
+
     @Column(nullable = false)
     val timestamp: Instant = Instant.now(),
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null
+    val id: Long? = null,
+
 )

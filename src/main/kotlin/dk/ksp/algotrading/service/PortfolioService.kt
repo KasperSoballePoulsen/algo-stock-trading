@@ -2,9 +2,11 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.MarketDataClient
 import dk.ksp.algotrading.client.NotificationClient
+import dk.ksp.algotrading.dto.response.StockTradingAccountDTO
 import dk.ksp.algotrading.entity.StockHolding
 import dk.ksp.algotrading.entity.StockOrder
 import dk.ksp.algotrading.entity.StockTrader
+import dk.ksp.algotrading.entity.StockTradingAccount
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.mapper.toStockPrice
 import dk.ksp.algotrading.repository.StockHoldingRepository
@@ -24,25 +26,25 @@ class PortfolioService(
     private val stockOrderRepository: StockOrderRepository,
     private val notificationClient: NotificationClient,
     private val marketDataClient: MarketDataClient,
-    ) {
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
     fun completeOrderInDatabase(
-        stockTrader: StockTrader,
+        tradingAccount: StockTradingAccount,
         symbol: String,
         quantity: Long,
         price: BigDecimal,
         type: OrderType
     ) {
-        saveOrder(stockTrader, symbol, quantity, price, type)
-        updatePortfolio(stockTrader, symbol, quantity, type)
+        stockOrderRepository.save(StockOrder(symbol, type, quantity, price, tradingAccount))
+        updatePortfolio(tradingAccount, symbol, quantity, type)
     }
 
 
     private fun updatePortfolio(
-        stockTrader: StockTrader,
+        tradingAccount: StockTradingAccount,
         symbol: String,
         quantity: Long,
         type: OrderType
@@ -50,14 +52,14 @@ class PortfolioService(
 
         val normalizedSymbol = symbol.uppercase()
 
-        val existingHolding = stockTrader.portfolio.find { it.symbol == normalizedSymbol }
+        val existingHolding = stockHoldingRepository.findByTradingAccountAndSymbol(tradingAccount, normalizedSymbol)
 
         when (type) {
             OrderType.BUY -> {
                 if (existingHolding != null)
                     existingHolding.quantity += quantity
                 else
-                    stockTrader.portfolio.add(StockHolding(stockTrader, normalizedSymbol, quantity))
+                    stockHoldingRepository.save(StockHolding(normalizedSymbol, quantity, tradingAccount))
             }
 
             OrderType.SELL -> {
@@ -70,18 +72,18 @@ class PortfolioService(
                 existingHolding.quantity -= quantity
 
                 if (existingHolding.quantity == 0L)
-                    stockTrader.portfolio.remove(existingHolding)
+                    stockHoldingRepository.delete(existingHolding)
             }
         }
     }
 
     @Scheduled(cron = "0 0 22 * * MON-FRI", zone = "Europe/Copenhagen")
     fun calculatePortfolioDailyPercentChange() {
-        val stockTraders = stockTraderRepository.findAll()
+        val stockTraders = stockTraderRepository.findAllByDeletedAtIsNullWithTradingAccount()
 
         val portfolioChanges = stockTraders.map { trader ->
             try {
-                val stockHoldings = stockHoldingRepository.findByTrader(trader)
+                val stockHoldings = stockHoldingRepository.findByTradingAccount(trader.tradingAccount)
 
                 if (stockHoldings.isEmpty()) {
                     return@map "${trader.username}: No holdings"
@@ -121,17 +123,6 @@ class PortfolioService(
         val message = portfolioChanges.joinToString("\n")
 
         notificationClient.sendNotification(message, "Portfolio Daily Change")
-    }
-
-
-    private fun saveOrder(
-        stockTrader: StockTrader,
-        symbol: String,
-        quantity: Long,
-        price: BigDecimal,
-        type: OrderType
-    ) {
-        stockOrderRepository.save(StockOrder(stockTrader, symbol, type, quantity, price))
     }
 
 }
