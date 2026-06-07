@@ -2,10 +2,8 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.MarketDataClient
 import dk.ksp.algotrading.client.NotificationClient
-import dk.ksp.algotrading.dto.response.StockTradingAccountDTO
 import dk.ksp.algotrading.entity.StockHolding
 import dk.ksp.algotrading.entity.StockOrder
-import dk.ksp.algotrading.entity.StockTrader
 import dk.ksp.algotrading.entity.StockTradingAccount
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.mapper.toStockPrice

@@ -3,7 +3,6 @@ package dk.ksp.algotrading.controller
 import dk.ksp.algotrading.dto.request.CreateStockTraderDTO
 import dk.ksp.algotrading.dto.response.StockTraderDTO
 import dk.ksp.algotrading.dto.response.StockTraderWithTradingAccountDTO
-import dk.ksp.algotrading.entity.StockTrader
 import dk.ksp.algotrading.service.StockTraderService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -32,6 +31,11 @@ class StockTraderController(
     @GetMapping("/{stockTraderId}")
     fun getStockTrader(@PathVariable stockTraderId: Long): StockTraderWithTradingAccountDTO {
         return stockTraderService.getStockTrader(stockTraderId)
+    }
+
+    @GetMapping
+    fun getStockTraders(): List<StockTraderDTO> {
+        return stockTraderService.getStockTraders()
     }
 
 }

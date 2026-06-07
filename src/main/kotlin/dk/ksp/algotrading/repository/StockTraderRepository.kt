@@ -38,4 +38,6 @@ interface StockTraderRepository : JpaRepository<StockTrader, Long> {
     """
     )
     fun findByIdAndDeletedAtIsNullWithTradingAccountWithHoldings(stockTraderId: Long): StockTrader?
+
+    fun findAllByDeletedAtIsNull(): List<StockTrader>
 }

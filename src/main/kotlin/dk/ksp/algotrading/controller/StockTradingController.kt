@@ -2,7 +2,6 @@ package dk.ksp.algotrading.controller
 
 import dk.ksp.algotrading.dto.request.StockOrderRequestDTO
 import dk.ksp.algotrading.dto.request.StockOrderResultDTO
-import dk.ksp.algotrading.service.PortfolioService
 import dk.ksp.algotrading.service.StockTradingService
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -17,7 +16,7 @@ class StockTradingController(
 ) {
 
     @PostMapping
-    fun createOrder(
+    fun createStockOrder(
         @PathVariable stockTraderId: Long,
         @RequestBody request: StockOrderRequestDTO
     ): StockOrderResultDTO {

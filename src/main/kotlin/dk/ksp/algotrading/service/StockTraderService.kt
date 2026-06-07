@@ -1,8 +1,10 @@
 package dk.ksp.algotrading.service
 
+import dk.ksp.algotrading.dto.response.StockTraderDTO
 import dk.ksp.algotrading.dto.response.StockTraderWithTradingAccountDTO
 import dk.ksp.algotrading.entity.StockTrader
 import dk.ksp.algotrading.entity.StockTradingAccount
+import dk.ksp.algotrading.mapper.toStockTraderDTOs
 import dk.ksp.algotrading.mapper.toStockTraderWithTradingAccountDTO
 import dk.ksp.algotrading.repository.StockTraderRepository
 import jakarta.transaction.Transactional
@@ -34,8 +36,12 @@ class StockTraderService(
     }
 
     fun getStockTrader(stockTraderId: Long): StockTraderWithTradingAccountDTO {
-        val stockTrader = stockTraderRepository.findByIdAndDeletedAtIsNullWithTradingAccount(stockTraderId)
+        val stockTrader = stockTraderRepository.findByIdAndDeletedAtIsNullWithTradingAccountWithHoldings(stockTraderId)
             ?: throw IllegalArgumentException("Trader not found")
         return stockTrader.toStockTraderWithTradingAccountDTO()
+    }
+
+    fun getStockTraders(): List<StockTraderDTO> {
+        return stockTraderRepository.findAllByDeletedAtIsNull().toStockTraderDTOs()
     }
 }

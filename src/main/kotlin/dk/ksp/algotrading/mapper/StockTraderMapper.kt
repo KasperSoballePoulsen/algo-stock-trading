@@ -13,3 +13,5 @@ fun StockTrader.toStockTraderWithTradingAccountDTO() =
         username,
         tradingAccount.toStockTradingAccountDTO()
     )
+
+fun List<StockTrader>.toStockTraderDTOs() = map { it.toStockTraderDTO() }
