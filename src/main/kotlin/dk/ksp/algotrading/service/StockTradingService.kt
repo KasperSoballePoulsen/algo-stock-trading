@@ -13,7 +13,7 @@ import java.math.BigDecimal
 class StockTradingService(
     private val stockTraderRepository: StockTraderRepository,
     private val stockHoldingRepository: StockHoldingRepository,
-    private val portfolioService: PortfolioService,
+    private val orderExecutionService: OrderExecutionService,
     private val brokerClient: BrokerClient,
 ) {
 
@@ -30,7 +30,7 @@ class StockTradingService(
         validateOrder(stockTrader, symbol, quantity, price, type)
         val isCompleted = brokerClient.sendOrder(stockTrader, symbol, quantity, price, type)
         if (isCompleted) {
-            portfolioService.completeOrderInDatabase(stockTrader.tradingAccount, symbol, quantity, price, type)
+            orderExecutionService.completeOrder(stockTrader.tradingAccount, symbol, quantity, price, type)
         }
 
         return StockOrderResultDTO(symbol, quantity, price, type, isCompleted)
@@ -56,12 +56,14 @@ class StockTradingService(
         }
 
         if (type == OrderType.SELL) {
-            val holding = stockHoldingRepository.findByTradingAccountAndSymbol(stockTrader.tradingAccount, symbol.uppercase())
-                ?: throw IllegalArgumentException("Cannot sell shares not owned")
+            val holding =
+                stockHoldingRepository.findByTradingAccountAndSymbol(stockTrader.tradingAccount, symbol.uppercase())
+                    ?: throw IllegalArgumentException("Cannot sell shares not owned")
 
             if (holding.quantity < quantity) {
                 throw IllegalArgumentException("Cannot sell more shares than owned")
             }
         }
     }
+
 }

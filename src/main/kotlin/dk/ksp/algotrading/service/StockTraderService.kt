@@ -1,7 +1,7 @@
 package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.dto.response.StockTraderDTO
-import dk.ksp.algotrading.dto.response.StockTraderWithTradingAccountDTO
+import dk.ksp.algotrading.dto.response.StockTraderWithTradingAccountWithHoldingsDTO
 import dk.ksp.algotrading.entity.StockTrader
 import dk.ksp.algotrading.entity.StockTradingAccount
 import dk.ksp.algotrading.mapper.toStockTraderDTOs
@@ -16,7 +16,7 @@ import java.time.Instant
 class StockTraderService(
     private val stockTraderRepository: StockTraderRepository
 ) {
-    fun createStockTrader(username: String): StockTraderWithTradingAccountDTO {
+    fun createStockTrader(username: String): StockTraderWithTradingAccountWithHoldingsDTO {
         val savedStockTrader = stockTraderRepository.save(
             StockTrader(username, StockTradingAccount(BigDecimal.ZERO))
         )
@@ -35,7 +35,7 @@ class StockTraderService(
         trader.deletedAt = Instant.now()
     }
 
-    fun getStockTrader(stockTraderId: Long): StockTraderWithTradingAccountDTO {
+    fun getStockTrader(stockTraderId: Long): StockTraderWithTradingAccountWithHoldingsDTO {
         val stockTrader = stockTraderRepository.findByIdAndDeletedAtIsNullWithTradingAccountWithHoldings(stockTraderId)
             ?: throw IllegalArgumentException("Trader not found")
         return stockTrader.toStockTraderWithTradingAccountDTO()

@@ -2,15 +2,9 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.MarketDataClient
 import dk.ksp.algotrading.client.NotificationClient
-import dk.ksp.algotrading.entity.StockHolding
-import dk.ksp.algotrading.entity.StockOrder
-import dk.ksp.algotrading.entity.StockTradingAccount
-import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.mapper.toStockPrice
 import dk.ksp.algotrading.repository.StockHoldingRepository
-import dk.ksp.algotrading.repository.StockOrderRepository
 import dk.ksp.algotrading.repository.StockTraderRepository
-import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -18,62 +12,13 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 @Service
-class PortfolioService(
+class NotificationService(
     private val stockTraderRepository: StockTraderRepository,
     private val stockHoldingRepository: StockHoldingRepository,
-    private val stockOrderRepository: StockOrderRepository,
     private val notificationClient: NotificationClient,
     private val marketDataClient: MarketDataClient,
 ) {
-
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    @Transactional
-    fun completeOrderInDatabase(
-        tradingAccount: StockTradingAccount,
-        symbol: String,
-        quantity: Long,
-        price: BigDecimal,
-        type: OrderType
-    ) {
-        stockOrderRepository.save(StockOrder(symbol, type, quantity, price, tradingAccount))
-        updatePortfolio(tradingAccount, symbol, quantity, type)
-    }
-
-
-    private fun updatePortfolio(
-        tradingAccount: StockTradingAccount,
-        symbol: String,
-        quantity: Long,
-        type: OrderType
-    ) {
-
-        val normalizedSymbol = symbol.uppercase()
-
-        val existingHolding = stockHoldingRepository.findByTradingAccountAndSymbol(tradingAccount, normalizedSymbol)
-
-        when (type) {
-            OrderType.BUY -> {
-                if (existingHolding != null)
-                    existingHolding.quantity += quantity
-                else
-                    stockHoldingRepository.save(StockHolding(normalizedSymbol, quantity, tradingAccount))
-            }
-
-            OrderType.SELL -> {
-                if (existingHolding == null)
-                    throw IllegalArgumentException("Cannot sell shares not owned")
-
-                if (existingHolding.quantity < quantity)
-                    throw IllegalArgumentException("Cannot sell more shares than owned")
-
-                existingHolding.quantity -= quantity
-
-                if (existingHolding.quantity == 0L)
-                    stockHoldingRepository.delete(existingHolding)
-            }
-        }
-    }
 
     @Scheduled(cron = "0 0 22 * * MON-FRI", zone = "Europe/Copenhagen")
     fun calculatePortfolioDailyPercentChange() {
@@ -122,5 +67,4 @@ class PortfolioService(
 
         notificationClient.sendNotification(message, "Portfolio Daily Change")
     }
-
 }
