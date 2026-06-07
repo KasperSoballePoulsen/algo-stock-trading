@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/stock-traders/{username}/orders")
+@RequestMapping("/api/stock-traders/{stockTraderId}/orders")
 class StockTradingController(
     private val stockTradingService: StockTradingService
 ) {
 
     @PostMapping
     fun createOrder(
-        @PathVariable username: String,
+        @PathVariable stockTraderId: Long,
         @RequestBody request: StockOrderRequestDTO
     ): StockOrderResultDTO {
-        return stockTradingService.createOrder(username, request.symbol, request.quantity, request.price, request.type)
+        return stockTradingService.createOrder(stockTraderId, request.symbol, request.quantity, request.price, request.type)
     }
 
 
