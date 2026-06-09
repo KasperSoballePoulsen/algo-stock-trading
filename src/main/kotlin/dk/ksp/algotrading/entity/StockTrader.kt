@@ -7,25 +7,44 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import java.math.BigDecimal
 import java.time.Instant
 
 @Entity
 @Table(name = "stock_traders")
-class StockTrader(
+class StockTrader protected constructor(
 
-    @Column(nullable = false, unique = true,)
+    @Column(nullable = false, unique = true)
     val username: String,
 
-    @OneToOne(cascade = [CascadeType.PERSIST])
-    @JoinColumn(name = "trading_account_id", nullable = false, unique = true)
-    val tradingAccount: StockTradingAccount,
+    @OneToMany(mappedBy = "stockTrader", cascade = [CascadeType.PERSIST])
+    val tradingAccounts: MutableList<StockTradingAccount> = mutableListOf(),
+
+    var deletedAt: Instant? = null,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    @Column(name = "id")
+    private var _id: Long? = null
+) {
+    val id: Long
+        get() = requireNotNull(_id) {
+            "Cannot access id of a StockTrader that has not been persisted"
+        }
 
-    var deletedAt: Instant? = null
-)
+    companion object {
+        fun create(username: String): StockTrader {
+            val trader = StockTrader(username)
+
+            val account = StockTradingAccount(BigDecimal.ZERO, trader)
+
+            trader.tradingAccounts.add(account)
+
+            return trader
+        }
+    }
+}
 

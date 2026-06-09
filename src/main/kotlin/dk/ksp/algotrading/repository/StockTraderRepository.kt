@@ -10,34 +10,33 @@ interface StockTraderRepository : JpaRepository<StockTrader, Long> {
         """
     SELECT st
     FROM StockTrader st
-    JOIN FETCH st.tradingAccount ta
+    WHERE st._id = :stockTraderId
+    AND st.deletedAt IS NULL
+    """
+    )
+    fun findActiveById(stockTraderId: Long): StockTrader?
+
+    @Query(
+        """
+    SELECT st
+    FROM StockTrader st
+    JOIN FETCH st.tradingAccounts ta
     WHERE st.deletedAt IS NULL
     """
     )
-    fun findAllByDeletedAtIsNullWithTradingAccount(): List<StockTrader>
+    fun findAllActiveWithTradingAccounts(): List<StockTrader>
 
     @Query(
         """
     SELECT st
     FROM StockTrader st
-    JOIN FETCH st.tradingAccount ta
-    WHERE st.id = :stockTraderId
+    JOIN FETCH st.tradingAccounts ta
+    WHERE st._id = :stockTraderId
     AND st.deletedAt IS NULL
+    AND ta.deletedAt IS NULL
     """
     )
-    fun findByIdAndDeletedAtIsNullWithTradingAccount(stockTraderId: Long): StockTrader?
-
-    @Query(
-        """
-    SELECT st
-    FROM StockTrader st
-    JOIN FETCH st.tradingAccount ta
-    LEFT JOIN FETCH ta.holdings
-    WHERE st.id = :stockTraderId
-    AND st.deletedAt IS NULL
-    """
-    )
-    fun findByIdAndDeletedAtIsNullWithTradingAccountWithHoldings(stockTraderId: Long): StockTrader?
+    fun findActiveByIdWithActiveTradingAccounts(stockTraderId: Long): StockTrader?
 
     fun findAllByDeletedAtIsNull(): List<StockTrader>
 }

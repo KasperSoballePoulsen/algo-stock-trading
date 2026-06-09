@@ -2,7 +2,7 @@ package dk.ksp.algotrading.controller
 
 import dk.ksp.algotrading.dto.request.CreateStockTraderDTO
 import dk.ksp.algotrading.dto.response.StockTraderDTO
-import dk.ksp.algotrading.dto.response.StockTraderWithTradingAccountWithHoldingsDTO
+import dk.ksp.algotrading.dto.response.StockTraderWithTradingAccountsDTO
 import dk.ksp.algotrading.service.StockTraderService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,17 +19,17 @@ class StockTraderController(
 ) {
 
     @PostMapping
-    fun createStockTrader(@RequestBody request: CreateStockTraderDTO): StockTraderWithTradingAccountWithHoldingsDTO {
+    fun createStockTrader(@RequestBody request: CreateStockTraderDTO): StockTraderWithTradingAccountsDTO {
         return stockTraderService.createStockTrader(request.username)
     }
 
     @DeleteMapping("/{stockTraderId}")
     fun deleteStockTrader(@PathVariable stockTraderId: Long) {
-        stockTraderService.deleteTrader(stockTraderId)
+        stockTraderService.deleteStockTrader(stockTraderId)
     }
 
     @GetMapping("/{stockTraderId}")
-    fun getStockTrader(@PathVariable stockTraderId: Long): StockTraderWithTradingAccountWithHoldingsDTO {
+    fun getStockTrader(@PathVariable stockTraderId: Long): StockTraderWithTradingAccountsDTO {
         return stockTraderService.getStockTrader(stockTraderId)
     }
 

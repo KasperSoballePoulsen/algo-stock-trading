@@ -5,6 +5,7 @@ import dk.ksp.algotrading.entity.StockTradingAccount
 import dk.ksp.algotrading.entity.StockTradingAccountTransaction
 import dk.ksp.algotrading.enum.AccountTransactionType
 import dk.ksp.algotrading.repository.StockTraderRepository
+import dk.ksp.algotrading.repository.StockTradingAccountRepository
 import dk.ksp.algotrading.repository.StockTradingAccountTransactionRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
@@ -13,7 +14,7 @@ import java.math.BigDecimal
 @Service
 class AccountTransactionService(
     private val stockTradingAccountTransactionRepository: StockTradingAccountTransactionRepository,
-    private val stockTraderRepository: StockTraderRepository
+    private val stockTradingAccountRepository: StockTradingAccountRepository
 ) {
     fun createOrderAccountTransaction(
         tradingAccount: StockTradingAccount,
@@ -30,7 +31,7 @@ class AccountTransactionService(
 
     @Transactional
     fun createManualAccountTransaction(
-        stockTraderId: Long,
+        tradingAccountId: Long,
         type: AccountTransactionType,
         amount: BigDecimal
     ) {
@@ -38,10 +39,8 @@ class AccountTransactionService(
             throw IllegalArgumentException("Only deposit and withdrawal are allowed manually")
         }
 
-        val trader = stockTraderRepository.findByIdAndDeletedAtIsNullWithTradingAccount(stockTraderId)
-            ?: throw IllegalArgumentException("Trader not found")
-
-        val tradingAccount = trader.tradingAccount
+        val tradingAccount = stockTradingAccountRepository.findActiveById(tradingAccountId)
+            ?: throw IllegalArgumentException("Can not find StockTradingAccount")
 
         createAccountTransaction(tradingAccount, type, amount)
     }
@@ -66,11 +65,11 @@ class AccountTransactionService(
 
         stockTradingAccountTransactionRepository.save(
             StockTradingAccountTransaction(
-                amount = signedAmount,
-                type = type,
-                balanceAfter = newBalance,
-                tradingAccount = tradingAccount,
-                stockOrder = stockOrder
+                signedAmount,
+                type,
+                newBalance,
+                tradingAccount,
+                stockOrder
             )
         )
     }

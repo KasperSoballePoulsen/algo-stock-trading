@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/stock-traders/{stockTraderId}")
-class StockTraderAccountController(
+@RequestMapping("/api/trading-accounts/{tradingAccountId}")
+class StockTradingAccountController(
     private val accountTransactionService: AccountTransactionService,
     private val stockTradingService: StockTradingService
 ) {
 
     @PostMapping("/orders")
     fun createStockOrder(
-        @PathVariable stockTraderId: Long,
+        @PathVariable tradingAccountId: Long,
         @RequestBody request: StockOrderRequestDTO
     ): StockOrderResultDTO {
         return stockTradingService.createOrder(
-            stockTraderId,
+            tradingAccountId,
             request.symbol,
             request.quantity,
             request.price,
@@ -34,9 +34,9 @@ class StockTraderAccountController(
 
     @PostMapping("/account-transactions")
     fun createAccountTransaction(
-        @PathVariable stockTraderId: Long,
+        @PathVariable tradingAccountId: Long,
         @RequestBody request: AccountTransactionRequestDTO
     ) {
-        accountTransactionService.createManualAccountTransaction(stockTraderId, request.type, request.amount)
+        accountTransactionService.createManualAccountTransaction(tradingAccountId, request.type, request.amount)
     }
 }

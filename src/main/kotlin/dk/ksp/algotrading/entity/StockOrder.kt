@@ -39,6 +39,11 @@ class StockOrder(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-
-)
+    @Column(name = "id")
+    private var _id: Long? = null
+) {
+    val id: Long
+        get() = requireNotNull(_id) {
+            "Cannot access id of a StockOrder that has not been persisted"
+        }
+}

@@ -46,7 +46,7 @@ class OrderExecutionService(
 
         val normalizedSymbol = symbol.uppercase()
 
-        val existingHolding = stockHoldingRepository.findByTradingAccountAndSymbol(tradingAccount, normalizedSymbol)
+        val existingHolding = stockHoldingRepository.findActiveByAccountIdAndSymbol(tradingAccount.id, normalizedSymbol)
 
         when (type) {
             OrderType.BUY -> {
