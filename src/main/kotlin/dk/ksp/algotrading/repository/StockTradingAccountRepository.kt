@@ -28,4 +28,16 @@ interface StockTradingAccountRepository : JpaRepository<StockTradingAccount, Lon
     """
     )
     fun findActiveById(accountId: Long): StockTradingAccount?
+
+    @Query(
+        """
+    SELECT sta
+    FROM StockTradingAccount sta
+    LEFT JOIN FETCH sta.holdings
+    WHERE sta._id = :accountId
+    AND sta.deletedAt IS NULL
+    AND sta.stockTrader.deletedAt IS NULL
+    """
+    )
+    fun findActiveByIdWithHoldings(accountId: Long): StockTradingAccount?
 }

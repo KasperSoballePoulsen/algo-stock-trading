@@ -3,8 +3,11 @@ package dk.ksp.algotrading.controller
 import dk.ksp.algotrading.dto.request.AccountTransactionRequestDTO
 import dk.ksp.algotrading.dto.request.StockOrderRequestDTO
 import dk.ksp.algotrading.dto.request.StockOrderResultDTO
+import dk.ksp.algotrading.dto.response.StockTradingAccountWithHoldingsDTO
 import dk.ksp.algotrading.service.AccountTransactionService
+import dk.ksp.algotrading.service.StockTradingAccountService
 import dk.ksp.algotrading.service.StockTradingService
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -15,7 +18,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/trading-accounts/{tradingAccountId}")
 class StockTradingAccountController(
     private val accountTransactionService: AccountTransactionService,
-    private val stockTradingService: StockTradingService
+    private val stockTradingService: StockTradingService,
+    private val stockTradingAccountService: StockTradingAccountService,
 ) {
 
     @PostMapping("/orders")
@@ -33,10 +37,16 @@ class StockTradingAccountController(
     }
 
     @PostMapping("/account-transactions")
-    fun createAccountTransaction(
+    fun createManualAccountTransaction(
         @PathVariable tradingAccountId: Long,
         @RequestBody request: AccountTransactionRequestDTO
     ) {
         accountTransactionService.createManualAccountTransaction(tradingAccountId, request.type, request.amount)
     }
+
+    @GetMapping
+    fun getStockTradingAccount(@PathVariable tradingAccountId: Long): StockTradingAccountWithHoldingsDTO {
+        return stockTradingAccountService.getStockTradingAccount(tradingAccountId)
+    }
+
 }

@@ -44,25 +44,27 @@ class StockTradingService(
         price: BigDecimal,
         type: OrderType
     ) {
-        require(symbol.isNotBlank()) {
-            "Symbol cannot be blank"
-        }
+        require(symbol.isNotBlank()) { "Symbol cannot be blank" }
+        require(quantity > 0) { "Quantity must be greater than 0" }
+        require(price > BigDecimal.ZERO) { "Price must be greater than 0" }
 
-        require(quantity > 0) {
-            "Quantity must be greater than 0"
-        }
+        when (type) {
+            OrderType.BUY -> {
+                val totalPrice = BigDecimal.valueOf(quantity).multiply(price)
 
-        require(price > BigDecimal.ZERO) {
-            "Price must be greater than 0"
-        }
+                require(tradingAccount.cashBalance >= totalPrice) {
+                    "Cannot buy for more money than owned"
+                }
+            }
 
-        if (type == OrderType.SELL) {
-            val holding =
-                stockHoldingRepository.findActiveByAccountIdAndSymbol(tradingAccount.id, symbol.uppercase())
+            OrderType.SELL -> {
+                val holding = stockHoldingRepository
+                    .findActiveByAccountIdAndSymbol(tradingAccount.id, symbol.uppercase())
                     ?: throw IllegalArgumentException("Cannot sell shares not owned")
 
-            if (holding.quantity < quantity) {
-                throw IllegalArgumentException("Cannot sell more shares than owned")
+                require(holding.quantity >= quantity) {
+                    "Cannot sell more shares than owned"
+                }
             }
         }
     }
