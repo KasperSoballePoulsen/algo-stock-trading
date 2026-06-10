@@ -1,9 +1,9 @@
 package dk.ksp.algotrading.mapper
 
-import dk.ksp.algotrading.dto.response.StockHoldingDTO
-import dk.ksp.algotrading.entity.StockHolding
+import dk.ksp.algotrading.dto.response.HoldingDTO
+import dk.ksp.algotrading.entity.Holding
 
-fun List<StockHolding>.toStockHoldingsDTO() = map { it.toStockHoldingDTO() }
+fun List<Holding>.toHoldingsDTO() = map { it.toHoldingDTO() }
 
 
-fun StockHolding.toStockHoldingDTO() = StockHoldingDTO(symbol, quantity)
+fun Holding.toHoldingDTO() = HoldingDTO(symbol, quantity)

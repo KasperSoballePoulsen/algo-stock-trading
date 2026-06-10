@@ -1,7 +1,6 @@
 package dk.ksp.algotrading.entity
 
-import dk.ksp.algotrading.enum.OrderStatus
-import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.enum.AccountTransactionType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -11,44 +10,37 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import java.math.BigDecimal
 import java.time.Instant
 
 @Entity
-@Table(name = "stock_orders")
-class StockOrder(
+@Table(name = "trading_account_transactions")
+class TradingAccountTransaction(
 
     @Column(nullable = false)
-    val symbol: String,
+    val amount: BigDecimal,
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    val type: OrderType,
-
-    val quantity: Long,
+    @Column(nullable = false)
+    val type: AccountTransactionType,
 
     @Column(nullable = false)
-    val price: BigDecimal,
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    val status: OrderStatus,
+    val balanceAfter: BigDecimal,
 
     @ManyToOne
     @JoinColumn(name = "trading_account_id", nullable = false)
-    val tradingAccount: StockTradingAccount,
+    val tradingAccount: TradingAccount,
+
+    @OneToOne
+    @JoinColumn(name = "order_id")
+    val order: Order? = null,
 
     @Column(nullable = false)
     val timestamp: Instant = Instant.now(),
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private var _id: Long? = null
-) {
-    val id: Long
-        get() = requireNotNull(_id) {
-            "Cannot access id of a StockOrder that has not been persisted"
-        }
-}
+    val id: Long? = null
+)

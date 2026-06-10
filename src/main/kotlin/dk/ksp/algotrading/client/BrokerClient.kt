@@ -1,7 +1,6 @@
 package dk.ksp.algotrading.client
 
-import dk.ksp.algotrading.entity.StockTrader
-import dk.ksp.algotrading.entity.StockTradingAccount
+import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
 import org.springframework.stereotype.Component
@@ -12,7 +11,7 @@ class BrokerClient {
 
     //TODO implement
     fun sendOrder(
-        stockAccount: StockTradingAccount,
+        stockAccount: TradingAccount,
         symbol: String,
         quantity: Long,
         price: BigDecimal,

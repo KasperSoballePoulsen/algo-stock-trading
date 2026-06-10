@@ -1,46 +1,46 @@
 package dk.ksp.algotrading.service
 
-import dk.ksp.algotrading.entity.StockHolding
-import dk.ksp.algotrading.entity.StockOrder
-import dk.ksp.algotrading.entity.StockTradingAccount
+import dk.ksp.algotrading.entity.Holding
+import dk.ksp.algotrading.entity.Order
+import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.mapper.toAccountTransactionType
-import dk.ksp.algotrading.repository.StockHoldingRepository
-import dk.ksp.algotrading.repository.StockOrderRepository
+import dk.ksp.algotrading.repository.HoldingRepository
+import dk.ksp.algotrading.repository.OrderRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Service
 class OrderExecutionService(
-    private val stockHoldingRepository: StockHoldingRepository,
-    private val stockOrderRepository: StockOrderRepository,
+    private val holdingRepository: HoldingRepository,
+    private val orderRepository: OrderRepository,
     private val accountTransactionService: AccountTransactionService,
 ) {
 
     @Transactional
     fun completeOrder(
-        tradingAccount: StockTradingAccount,
+        tradingAccount: TradingAccount,
         symbol: String,
         quantity: Long,
         price: BigDecimal,
         type: OrderType,
         orderStatus: OrderStatus
     ) {
-        val stockOrder = stockOrderRepository.save(StockOrder(symbol, type, quantity, price, orderStatus, tradingAccount))
+        val order = orderRepository.save(Order(symbol, type, quantity, price, orderStatus, tradingAccount))
         updateHoldings(tradingAccount, symbol, quantity, type)
         accountTransactionService.createOrderAccountTransaction(
             tradingAccount,
             type.toAccountTransactionType(),
             price.multiply(quantity.toBigDecimal()),
-            stockOrder
+            order
         )
     }
 
 
     private fun updateHoldings(
-        tradingAccount: StockTradingAccount,
+        tradingAccount: TradingAccount,
         symbol: String,
         quantity: Long,
         type: OrderType
@@ -48,14 +48,14 @@ class OrderExecutionService(
 
         val normalizedSymbol = symbol.uppercase()
 
-        val existingHolding = stockHoldingRepository.findActiveByAccountIdAndSymbol(tradingAccount.id, normalizedSymbol)
+        val existingHolding = holdingRepository.findActiveByAccountIdAndSymbol(tradingAccount.id, normalizedSymbol)
 
         when (type) {
             OrderType.BUY -> {
                 if (existingHolding != null)
                     existingHolding.quantity += quantity
                 else
-                    stockHoldingRepository.save(StockHolding(normalizedSymbol, quantity, tradingAccount))
+                    holdingRepository.save(Holding(normalizedSymbol, quantity, tradingAccount))
             }
 
             OrderType.SELL -> {
@@ -68,7 +68,7 @@ class OrderExecutionService(
                 existingHolding.quantity -= quantity
 
                 if (existingHolding.quantity == 0L)
-                    stockHoldingRepository.delete(existingHolding)
+                    holdingRepository.delete(existingHolding)
             }
         }
     }

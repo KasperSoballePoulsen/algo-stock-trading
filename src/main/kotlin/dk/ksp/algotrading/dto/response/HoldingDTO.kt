@@ -1,6 +1,6 @@
 package dk.ksp.algotrading.dto.response
 
-data class StockHoldingDTO(
+data class HoldingDTO(
     val symbol: String,
     val quantity: Long,
 )

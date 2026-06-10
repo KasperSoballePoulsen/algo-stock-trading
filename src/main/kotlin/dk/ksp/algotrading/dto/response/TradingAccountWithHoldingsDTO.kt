@@ -2,8 +2,8 @@ package dk.ksp.algotrading.dto.response
 
 import java.math.BigDecimal
 
-data class StockTradingAccountWithHoldingsDTO(
+data class TradingAccountWithHoldingsDTO(
     val accountId: Long,
     val cashBalance: BigDecimal,
-    val holdings: List<StockHoldingDTO>
+    val holdings: List<HoldingDTO>
 )

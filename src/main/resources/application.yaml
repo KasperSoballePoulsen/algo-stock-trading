@@ -14,4 +14,4 @@ finnhub:
   api-key: ${FINNHUB_API_KEY}
 
 ntfy:
-  stock-topic-name: ${NTFY_STOCK_TOPIC_NAME}
+  topic-name: ${NTFY_TOPIC_NAME}

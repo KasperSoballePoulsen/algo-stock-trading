@@ -1,12 +1,12 @@
 package dk.ksp.algotrading.mapper
 
-import dk.ksp.algotrading.dto.response.StockTraderDTO
-import dk.ksp.algotrading.dto.response.StockTraderWithTradingAccountsDTO
-import dk.ksp.algotrading.entity.StockTrader
+import dk.ksp.algotrading.dto.response.TraderDTO
+import dk.ksp.algotrading.dto.response.TraderWithTradingAccountsDTO
+import dk.ksp.algotrading.entity.Trader
 
-fun StockTrader.toStockTraderDTO() = StockTraderDTO(id, username)
+fun Trader.toTraderDTO() = TraderDTO(id, username)
 
-fun StockTrader.toStockTraderWithTradingAccountsDTO() =
-    StockTraderWithTradingAccountsDTO(id, username, tradingAccounts.toStockTradingAccountsDTO())
+fun Trader.toTraderWithTradingAccountsDTO() =
+    TraderWithTradingAccountsDTO(id, username, tradingAccounts.toTradingAccountsDTO())
 
-fun List<StockTrader>.toStockTraderDTOs() = map { it.toStockTraderDTO() }
+fun List<Trader>.toTraderDTOs() = map { it.toTraderDTO() }

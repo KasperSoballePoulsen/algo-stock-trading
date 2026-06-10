@@ -6,22 +6,20 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import java.math.BigDecimal
 import java.time.Instant
 
 @Entity
-@Table(name = "stock_traders")
-class StockTrader protected constructor(
+@Table(name = "traders")
+class Trader protected constructor(
 
     @Column(nullable = false, unique = true)
     val username: String,
 
-    @OneToMany(mappedBy = "stockTrader", cascade = [CascadeType.PERSIST])
-    val tradingAccounts: MutableList<StockTradingAccount> = mutableListOf(),
+    @OneToMany(mappedBy = "trader", cascade = [CascadeType.PERSIST])
+    val tradingAccounts: MutableList<TradingAccount> = mutableListOf(),
 
     var deletedAt: Instant? = null,
 
@@ -32,14 +30,14 @@ class StockTrader protected constructor(
 ) {
     val id: Long
         get() = requireNotNull(_id) {
-            "Cannot access id of a StockTrader that has not been persisted"
+            "Cannot access id of a Trader that has not been persisted"
         }
 
     companion object {
-        fun create(username: String): StockTrader {
-            val trader = StockTrader(username)
+        fun create(username: String): Trader {
+            val trader = Trader(username)
 
-            val account = StockTradingAccount(BigDecimal.ZERO, trader)
+            val account = TradingAccount(BigDecimal.ZERO, trader)
 
             trader.tradingAccounts.add(account)
 

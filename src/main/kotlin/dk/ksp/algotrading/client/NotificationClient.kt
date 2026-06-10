@@ -9,15 +9,15 @@ import java.net.http.HttpResponse
 
 @Component
 class NotificationClient(
-    @Value("\${ntfy.stock-topic-name}")
-    private val stockTopicName: String
+    @Value("\${ntfy.topic-name}")
+    private val topicName: String
 ) {
     private val client = HttpClient.newHttpClient()
 
     fun sendNotification(message: String, title: String) {
 
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("https://ntfy.sh/$stockTopicName"))
+            .uri(URI.create("https://ntfy.sh/$topicName"))
             .header("Title", title)
             .POST(HttpRequest.BodyPublishers.ofString(message))
             .build()

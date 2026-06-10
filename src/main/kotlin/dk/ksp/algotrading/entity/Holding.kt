@@ -10,8 +10,8 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "stock_holdings")
-class StockHolding(
+@Table(name = "holdings")
+class Holding(
 
     @Column(nullable = false)
     val symbol: String,
@@ -20,7 +20,7 @@ class StockHolding(
 
     @ManyToOne
     @JoinColumn(name = "trading_account_id", nullable = false)
-    val tradingAccount: StockTradingAccount,
+    val tradingAccount: TradingAccount,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +29,6 @@ class StockHolding(
 ) {
     val id: Long
         get() = requireNotNull(_id) {
-            "Cannot access id of a StockHolding that has not been persisted"
+            "Cannot access id of a Holding that has not been persisted"
         }
 }

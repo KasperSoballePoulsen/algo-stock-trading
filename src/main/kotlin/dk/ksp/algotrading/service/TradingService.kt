@@ -1,19 +1,19 @@
 package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.BrokerClient
-import dk.ksp.algotrading.dto.response.StockOrderDTO
-import dk.ksp.algotrading.entity.StockTradingAccount
+import dk.ksp.algotrading.dto.response.OrderDTO
+import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
-import dk.ksp.algotrading.repository.StockHoldingRepository
-import dk.ksp.algotrading.repository.StockTradingAccountRepository
+import dk.ksp.algotrading.repository.HoldingRepository
+import dk.ksp.algotrading.repository.TradingAccountRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Service
-class StockTradingService(
-    private val stockTradingAccountRepository: StockTradingAccountRepository,
-    private val stockHoldingRepository: StockHoldingRepository,
+class TradingService(
+    private val tradingAccountRepository: TradingAccountRepository,
+    private val holdingRepository: HoldingRepository,
     private val orderExecutionService: OrderExecutionService,
     private val brokerClient: BrokerClient,
 ) {
@@ -24,9 +24,9 @@ class StockTradingService(
         quantity: Long,
         price: BigDecimal,
         type: OrderType
-    ): StockOrderDTO {
+    ): OrderDTO {
 
-        val tradingAccount = stockTradingAccountRepository.findActiveById(tradingAccountId)
+        val tradingAccount = tradingAccountRepository.findActiveById(tradingAccountId)
             ?: throw IllegalArgumentException("Trading account not found")
 
         validateOrder(tradingAccount, symbol, quantity, price, type)
@@ -34,14 +34,14 @@ class StockTradingService(
 
         if (status == OrderStatus.FILLED) {
             orderExecutionService.completeOrder(tradingAccount, symbol, quantity, price, type, status)
-            return StockOrderDTO(symbol, quantity, price, type, OrderStatus.FILLED)
+            return OrderDTO(symbol, quantity, price, type, OrderStatus.FILLED)
         }
 
-        return StockOrderDTO(symbol, quantity, price, type, OrderStatus.REJECTED)
+        return OrderDTO(symbol, quantity, price, type, OrderStatus.REJECTED)
     }
 
     private fun validateOrder(
-        tradingAccount: StockTradingAccount,
+        tradingAccount: TradingAccount,
         symbol: String,
         quantity: Long,
         price: BigDecimal,
@@ -61,7 +61,7 @@ class StockTradingService(
             }
 
             OrderType.SELL -> {
-                val holding = stockHoldingRepository
+                val holding = holdingRepository
                     .findActiveByAccountIdAndSymbol(tradingAccount.id, symbol.uppercase())
                     ?: throw IllegalArgumentException("Cannot sell shares not owned")
 

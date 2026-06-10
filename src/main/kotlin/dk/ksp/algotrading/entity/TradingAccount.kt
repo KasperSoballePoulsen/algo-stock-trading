@@ -9,29 +9,28 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import java.math.BigDecimal
 import java.time.Instant
 
 @Entity
-@Table(name = "stock_trading_accounts")
-class StockTradingAccount(
+@Table(name = "trading_accounts")
+class TradingAccount(
 
     @Column(nullable = false)
     var cashBalance: BigDecimal,
 
     @ManyToOne
-    @JoinColumn(name = "stock_trader_id", nullable = false)
-    val stockTrader: StockTrader,
+    @JoinColumn(name = "trader_id", nullable = false)
+    val trader: Trader,
 
     var deletedAt: Instant? = null,
 
     @OneToMany(cascade = [CascadeType.PERSIST], mappedBy = "tradingAccount")
-    var holdings: MutableList<StockHolding> = mutableListOf(),
+    var holdings: MutableList<Holding> = mutableListOf(),
 
     @OneToMany(cascade = [CascadeType.PERSIST], mappedBy = "tradingAccount")
-    var orders: MutableList<StockOrder> = mutableListOf(),
+    var orders: MutableList<Order> = mutableListOf(),
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,6 +40,6 @@ class StockTradingAccount(
     ) {
     val id: Long
         get() = requireNotNull(_id) {
-            "Cannot access id of a StockTradingAccount that has not been persisted"
+            "Cannot access id of a TradingAccount that has not been persisted"
         }
 }

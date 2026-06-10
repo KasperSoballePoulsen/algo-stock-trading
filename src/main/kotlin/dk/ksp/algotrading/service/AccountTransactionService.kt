@@ -1,32 +1,31 @@
 package dk.ksp.algotrading.service
 
-import dk.ksp.algotrading.entity.StockOrder
-import dk.ksp.algotrading.entity.StockTradingAccount
-import dk.ksp.algotrading.entity.StockTradingAccountTransaction
+import dk.ksp.algotrading.entity.Order
+import dk.ksp.algotrading.entity.TradingAccount
+import dk.ksp.algotrading.entity.TradingAccountTransaction
 import dk.ksp.algotrading.enum.AccountTransactionType
-import dk.ksp.algotrading.repository.StockTraderRepository
-import dk.ksp.algotrading.repository.StockTradingAccountRepository
-import dk.ksp.algotrading.repository.StockTradingAccountTransactionRepository
+import dk.ksp.algotrading.repository.TradingAccountRepository
+import dk.ksp.algotrading.repository.TradingAccountTransactionRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Service
 class AccountTransactionService(
-    private val stockTradingAccountTransactionRepository: StockTradingAccountTransactionRepository,
-    private val stockTradingAccountRepository: StockTradingAccountRepository
+    private val tradingAccountTransactionRepository: TradingAccountTransactionRepository,
+    private val tradingAccountRepository: TradingAccountRepository
 ) {
     fun createOrderAccountTransaction(
-        tradingAccount: StockTradingAccount,
+        tradingAccount: TradingAccount,
         type: AccountTransactionType,
         amount: BigDecimal,
-        stockOrder: StockOrder
+        order: Order
     ) {
         if (type != AccountTransactionType.SELL_ORDER && type != AccountTransactionType.BUY_ORDER) {
             throw IllegalArgumentException("Only SELL or BUY order type allowed")
         }
 
-        createAccountTransaction(tradingAccount, type, amount, stockOrder)
+        createAccountTransaction(tradingAccount, type, amount, order)
     }
 
     @Transactional
@@ -39,17 +38,17 @@ class AccountTransactionService(
             throw IllegalArgumentException("Only deposit and withdrawal are allowed manually")
         }
 
-        val tradingAccount = stockTradingAccountRepository.findActiveById(tradingAccountId)
-            ?: throw IllegalArgumentException("Can not find StockTradingAccount")
+        val tradingAccount = tradingAccountRepository.findActiveById(tradingAccountId)
+            ?: throw IllegalArgumentException("Can not find TradingAccount")
 
         createAccountTransaction(tradingAccount, type, amount)
     }
 
     private fun createAccountTransaction(
-        tradingAccount: StockTradingAccount,
+        tradingAccount: TradingAccount,
         type: AccountTransactionType,
         amount: BigDecimal,
-        stockOrder: StockOrder? = null
+        order: Order? = null
     ) {
 
         val signedAmount = when (type) {
@@ -63,13 +62,13 @@ class AccountTransactionService(
         val newBalance = tradingAccount.cashBalance + signedAmount
         tradingAccount.cashBalance = newBalance
 
-        stockTradingAccountTransactionRepository.save(
-            StockTradingAccountTransaction(
+        tradingAccountTransactionRepository.save(
+            TradingAccountTransaction(
                 signedAmount,
                 type,
                 newBalance,
                 tradingAccount,
-                stockOrder
+                order
             )
         )
     }
