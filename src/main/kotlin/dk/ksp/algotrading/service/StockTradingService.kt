@@ -34,6 +34,7 @@ class StockTradingService(
 
         if (status == OrderStatus.FILLED) {
             orderExecutionService.completeOrder(tradingAccount, symbol, quantity, price, type, status)
+            return StockOrderDTO(symbol, quantity, price, type, OrderStatus.FILLED)
         }
 
         return StockOrderDTO(symbol, quantity, price, type, OrderStatus.REJECTED)
