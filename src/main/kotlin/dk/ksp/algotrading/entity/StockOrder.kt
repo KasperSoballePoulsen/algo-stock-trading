@@ -1,5 +1,6 @@
 package dk.ksp.algotrading.entity
 
+import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -29,6 +30,10 @@ class StockOrder(
 
     @Column(nullable = false)
     val price: BigDecimal,
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    val status: OrderStatus,
 
     @ManyToOne
     @JoinColumn(name = "trading_account_id", nullable = false)

@@ -3,6 +3,7 @@ package dk.ksp.algotrading.service
 import dk.ksp.algotrading.entity.StockHolding
 import dk.ksp.algotrading.entity.StockOrder
 import dk.ksp.algotrading.entity.StockTradingAccount
+import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.mapper.toAccountTransactionType
 import dk.ksp.algotrading.repository.StockHoldingRepository
@@ -24,9 +25,10 @@ class OrderExecutionService(
         symbol: String,
         quantity: Long,
         price: BigDecimal,
-        type: OrderType
+        type: OrderType,
+        orderStatus: OrderStatus
     ) {
-        val stockOrder = stockOrderRepository.save(StockOrder(symbol, type, quantity, price, tradingAccount))
+        val stockOrder = stockOrderRepository.save(StockOrder(symbol, type, quantity, price, orderStatus, tradingAccount))
         updateHoldings(tradingAccount, symbol, quantity, type)
         accountTransactionService.createOrderAccountTransaction(
             tradingAccount,

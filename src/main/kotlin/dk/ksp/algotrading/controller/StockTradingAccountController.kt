@@ -2,7 +2,7 @@ package dk.ksp.algotrading.controller
 
 import dk.ksp.algotrading.dto.request.AccountTransactionRequestDTO
 import dk.ksp.algotrading.dto.request.StockOrderRequestDTO
-import dk.ksp.algotrading.dto.request.StockOrderResultDTO
+import dk.ksp.algotrading.dto.response.StockOrderDTO
 import dk.ksp.algotrading.dto.response.StockTradingAccountWithHoldingsDTO
 import dk.ksp.algotrading.service.AccountTransactionService
 import dk.ksp.algotrading.service.StockTradingAccountService
@@ -26,7 +26,7 @@ class StockTradingAccountController(
     fun createStockOrder(
         @PathVariable tradingAccountId: Long,
         @RequestBody request: StockOrderRequestDTO
-    ): StockOrderResultDTO {
+    ): StockOrderDTO {
         return stockTradingService.createOrder(
             tradingAccountId,
             request.symbol,

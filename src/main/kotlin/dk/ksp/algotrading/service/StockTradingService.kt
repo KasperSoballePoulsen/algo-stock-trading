@@ -1,8 +1,9 @@
 package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.BrokerClient
-import dk.ksp.algotrading.dto.request.StockOrderResultDTO
+import dk.ksp.algotrading.dto.response.StockOrderDTO
 import dk.ksp.algotrading.entity.StockTradingAccount
+import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.repository.StockHoldingRepository
 import dk.ksp.algotrading.repository.StockTradingAccountRepository
@@ -23,18 +24,19 @@ class StockTradingService(
         quantity: Long,
         price: BigDecimal,
         type: OrderType
-    ): StockOrderResultDTO {
+    ): StockOrderDTO {
 
         val tradingAccount = stockTradingAccountRepository.findActiveById(tradingAccountId)
             ?: throw IllegalArgumentException("Trading account not found")
 
         validateOrder(tradingAccount, symbol, quantity, price, type)
-        val isCompleted = brokerClient.sendOrder(tradingAccount, symbol, quantity, price, type)
-        if (isCompleted) {
-            orderExecutionService.completeOrder(tradingAccount, symbol, quantity, price, type)
+        val status = brokerClient.sendOrder(tradingAccount, symbol, quantity, price, type)
+
+        if (status == OrderStatus.FILLED) {
+            orderExecutionService.completeOrder(tradingAccount, symbol, quantity, price, type, status)
         }
 
-        return StockOrderResultDTO(symbol, quantity, price, type, isCompleted)
+        return StockOrderDTO(symbol, quantity, price, type, OrderStatus.REJECTED)
     }
 
     private fun validateOrder(

@@ -2,6 +2,7 @@ package dk.ksp.algotrading.client
 
 import dk.ksp.algotrading.entity.StockTrader
 import dk.ksp.algotrading.entity.StockTradingAccount
+import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -16,7 +17,7 @@ class BrokerClient {
         quantity: Long,
         price: BigDecimal,
         type: OrderType
-    ): Boolean {
-        return true
+    ): OrderStatus {
+        return OrderStatus.FILLED
     }
 }
