@@ -1,5 +1,6 @@
 package dk.ksp.algotrading.service
 
+import dk.ksp.algotrading.client.BrokerClient
 import dk.ksp.algotrading.dto.response.TraderDTO
 import dk.ksp.algotrading.dto.response.TraderWithTradingAccountsDTO
 import dk.ksp.algotrading.entity.Trader
@@ -14,12 +15,20 @@ import java.time.Instant
 @Service
 class TraderService(
     private val traderRepository: TraderRepository,
-    private val tradingAccountRepository: TradingAccountRepository
+    private val tradingAccountRepository: TradingAccountRepository,
+    private val brokerClient: BrokerClient
 ) {
     fun createTrader(username: String): TraderWithTradingAccountsDTO {
+        val saxoClient = brokerClient.getSaxoClient()
+
         val savedTrader = traderRepository.save(
-            Trader.create(username)
+            Trader.create(
+                username,
+                saxoClient.clientKey,
+                saxoClient.defaultAccountKey
+            )
         )
+
         return savedTrader.toTraderWithTradingAccountsDTO()
     }
 
@@ -36,7 +45,7 @@ class TraderService(
                 throw IllegalArgumentException("Cannot delete trader having account with holdings")
             }
 
-            if (it.cashBalance.signum() != 0) {
+            if (it.cashAvailable.signum() != 0) {
                 throw IllegalArgumentException("Cannot delete trader with account cash balance")
             }
 

@@ -18,6 +18,9 @@ class Trader protected constructor(
     @Column(nullable = false, unique = true)
     val username: String,
 
+    @Column(nullable = false)
+    val saxoClientKey: String,
+
     @OneToMany(mappedBy = "trader", cascade = [CascadeType.PERSIST])
     val tradingAccounts: MutableList<TradingAccount> = mutableListOf(),
 
@@ -34,10 +37,12 @@ class Trader protected constructor(
         }
 
     companion object {
-        fun create(username: String): Trader {
-            val trader = Trader(username)
 
-            val account = TradingAccount(BigDecimal.ZERO, trader)
+        fun create(username: String, saxoClientKey: String, saxoAccountKey: String): Trader {
+
+            val trader = Trader(username, saxoClientKey)
+
+            val account = TradingAccount(BigDecimal.ZERO, saxoAccountKey, trader)
 
             trader.tradingAccounts.add(account)
 

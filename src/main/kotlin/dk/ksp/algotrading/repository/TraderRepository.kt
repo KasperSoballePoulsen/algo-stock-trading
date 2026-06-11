@@ -30,7 +30,7 @@ interface TraderRepository : JpaRepository<Trader, Long> {
         """
     SELECT t
     FROM Trader t
-    JOIN FETCH st.tradingAccounts ta
+    JOIN FETCH t.tradingAccounts ta
     WHERE t._id = :traderId
     AND t.deletedAt IS NULL
     AND ta.deletedAt IS NULL

@@ -55,7 +55,7 @@ class TradingService(
             OrderType.BUY -> {
                 val totalPrice = BigDecimal.valueOf(quantity).multiply(price)
 
-                require(tradingAccount.cashBalance >= totalPrice) {
+                require(tradingAccount.cashAvailable >= totalPrice) {
                     "Cannot buy for more money than owned"
                 }
             }

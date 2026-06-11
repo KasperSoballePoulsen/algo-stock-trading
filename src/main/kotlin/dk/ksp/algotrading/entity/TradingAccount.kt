@@ -18,7 +18,10 @@ import java.time.Instant
 class TradingAccount(
 
     @Column(nullable = false)
-    var cashBalance: BigDecimal,
+    var cashAvailable: BigDecimal,
+
+    @Column(nullable = false)
+    val saxoAccountKey: String,
 
     @ManyToOne
     @JoinColumn(name = "trader_id", nullable = false)

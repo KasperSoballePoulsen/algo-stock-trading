@@ -15,3 +15,8 @@ finnhub:
 
 ntfy:
   topic-name: ${NTFY_TOPIC_NAME}
+  base-url: ${NTFY_BASE_URL}
+
+saxo-sim-api:
+  base-url: ${SAXO_SIM_BASE_URL}
+  api-token: ${SAXO_24H_TOKEN}

@@ -59,8 +59,8 @@ class AccountTransactionService(
             AccountTransactionType.BUY_ORDER -> amount.negate()
         }
 
-        val newBalance = tradingAccount.cashBalance + signedAmount
-        tradingAccount.cashBalance = newBalance
+        val newBalance = tradingAccount.cashAvailable + signedAmount
+        tradingAccount.cashAvailable = newBalance
 
         tradingAccountTransactionRepository.save(
             TradingAccountTransaction(
