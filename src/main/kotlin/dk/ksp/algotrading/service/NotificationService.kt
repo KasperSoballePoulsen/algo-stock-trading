@@ -63,7 +63,7 @@ class NotificationService(
                 val percentChange = todaysValue
                     .subtract(yesterdaysValue)
                     .divide(yesterdaysValue, 4, RoundingMode.HALF_UP)
-                    .multiply(BigDecimal("100"))
+                    .multiply(100.toBigDecimal())
                     .setScale(2, RoundingMode.HALF_UP)
 
                 "${trader.username}: $percentChange%"

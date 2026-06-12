@@ -33,7 +33,7 @@ class Order(
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    val status: OrderStatus,
+    var status: OrderStatus,
 
     @ManyToOne
     @JoinColumn(name = "trading_account_id", nullable = false)

@@ -38,11 +38,16 @@ class Trader protected constructor(
 
     companion object {
 
-        fun create(username: String, saxoClientKey: String, saxoAccountKey: String): Trader {
+        fun create(
+            username: String,
+            saxoClientKey: String,
+            saxoAccountKey: String,
+            cashAvailableForTrading: BigDecimal
+        ): Trader {
 
             val trader = Trader(username, saxoClientKey)
 
-            val account = TradingAccount(BigDecimal.ZERO, saxoAccountKey, trader)
+            val account = TradingAccount(cashAvailableForTrading, saxoAccountKey, trader)
 
             trader.tradingAccounts.add(account)
 

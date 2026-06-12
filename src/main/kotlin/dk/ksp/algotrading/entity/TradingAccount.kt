@@ -18,7 +18,7 @@ import java.time.Instant
 class TradingAccount(
 
     @Column(nullable = false)
-    var cashAvailable: BigDecimal,
+    var cashAvailableForTrading: BigDecimal,
 
     @Column(nullable = false)
     val saxoAccountKey: String,

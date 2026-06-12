@@ -6,8 +6,8 @@ import dk.ksp.algotrading.entity.TradingAccountTransaction
 import dk.ksp.algotrading.enum.AccountTransactionType
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import dk.ksp.algotrading.repository.TradingAccountTransactionRepository
-import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 
 @Service
@@ -59,8 +59,8 @@ class AccountTransactionService(
             AccountTransactionType.BUY_ORDER -> amount.negate()
         }
 
-        val newBalance = tradingAccount.cashAvailable + signedAmount
-        tradingAccount.cashAvailable = newBalance
+        val newBalance = tradingAccount.cashAvailableForTrading + signedAmount
+        tradingAccount.cashAvailableForTrading = newBalance
 
         tradingAccountTransactionRepository.save(
             TradingAccountTransaction(

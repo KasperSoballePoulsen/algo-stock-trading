@@ -5,6 +5,7 @@ import dk.ksp.algotrading.dto.response.OrderDTO
 import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.exception.BrokerRejectedException
 import dk.ksp.algotrading.repository.HoldingRepository
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import org.springframework.stereotype.Service
@@ -13,9 +14,9 @@ import java.math.BigDecimal
 @Service
 class TradingService(
     private val tradingAccountRepository: TradingAccountRepository,
-    private val holdingRepository: HoldingRepository,
     private val orderExecutionService: OrderExecutionService,
     private val brokerClient: BrokerClient,
+    private val orderReservationService: OrderReservationService
 ) {
 
     fun createOrder(
@@ -26,50 +27,71 @@ class TradingService(
         type: OrderType
     ): OrderDTO {
 
-        val tradingAccount = tradingAccountRepository.findActiveById(tradingAccountId)
+        val tradingAccount = tradingAccountRepository.findActiveByIdWithTrader(tradingAccountId)
             ?: throw IllegalArgumentException("Trading account not found")
 
-        validateOrder(tradingAccount, symbol, quantity, price, type)
-        val status = brokerClient.sendOrder(tradingAccount, symbol, quantity, price, type)
+        val saxoBalances = brokerClient.getSaxoAccountBalances(
+            tradingAccount.trader.saxoClientKey,
+            tradingAccount.saxoAccountKey
+        )
 
-        if (status == OrderStatus.FILLED) {
-            orderExecutionService.completeOrder(tradingAccount, symbol, quantity, price, type, status)
-            return OrderDTO(symbol, quantity, price, type, OrderStatus.FILLED)
+        val createdOrder = orderReservationService.reserveOrder(
+            tradingAccountId,
+            symbol,
+            quantity,
+            price,
+            type,
+            saxoBalances.cashAvailableForTrading
+        )
+
+        val status = try {
+            brokerClient.sendOrder(
+                tradingAccount.trader.saxoClientKey,
+                tradingAccount.saxoAccountKey,
+                symbol,
+                quantity,
+                price,
+                type
+            )
+        } catch (ex: BrokerRejectedException) {
+            OrderStatus.REJECTED
         }
 
-        return OrderDTO(symbol, quantity, price, type, OrderStatus.REJECTED)
+        orderExecutionService.completeOrder(createdOrder.id, status)
+
+        return OrderDTO(symbol, quantity, price, type, status)
     }
 
-    private fun validateOrder(
-        tradingAccount: TradingAccount,
-        symbol: String,
-        quantity: Long,
-        price: BigDecimal,
-        type: OrderType
-    ) {
-        require(symbol.isNotBlank()) { "Symbol cannot be blank" }
-        require(quantity > 0) { "Quantity must be greater than 0" }
-        require(price > BigDecimal.ZERO) { "Price must be greater than 0" }
-
-        when (type) {
-            OrderType.BUY -> {
-                val totalPrice = BigDecimal.valueOf(quantity).multiply(price)
-
-                require(tradingAccount.cashAvailable >= totalPrice) {
-                    "Cannot buy for more money than owned"
-                }
-            }
-
-            OrderType.SELL -> {
-                val holding = holdingRepository
-                    .findActiveByAccountIdAndSymbol(tradingAccount.id, symbol.uppercase())
-                    ?: throw IllegalArgumentException("Cannot sell shares not owned")
-
-                require(holding.quantity >= quantity) {
-                    "Cannot sell more shares than owned"
-                }
-            }
-        }
-    }
+//    private fun validateOrder(
+//        tradingAccount: TradingAccount,
+//        symbol: String,
+//        quantity: Long,
+//        price: BigDecimal,
+//        type: OrderType
+//    ) {
+//        require(symbol.isNotBlank()) { "Symbol cannot be blank" }
+//        require(quantity > 0) { "Quantity must be greater than 0" }
+//        require(price > BigDecimal.ZERO) { "Price must be greater than 0" }
+//
+//        when (type) {
+//            OrderType.BUY -> {
+//                val totalPrice = price.multiply(quantity.toBigDecimal())
+//
+//                require(tradingAccount.cashAvailableForTrading >= totalPrice) {
+//                    "Cannot buy for more money than owned"
+//                }
+//            }
+//
+//            OrderType.SELL -> {
+//                val holding = holdingRepository
+//                    .findActiveByAccountIdAndSymbol(tradingAccount.id, symbol.uppercase())
+//                    ?: throw IllegalArgumentException("Cannot sell shares not owned")
+//
+//                require(holding.quantity >= quantity) {
+//                    "Cannot sell more shares than owned"
+//                }
+//            }
+//        }
+//    }
 
 }

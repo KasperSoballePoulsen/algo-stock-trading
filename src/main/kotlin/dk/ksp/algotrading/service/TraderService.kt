@@ -10,6 +10,7 @@ import dk.ksp.algotrading.repository.TraderRepository
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.Instant
 
 @Service
@@ -21,11 +22,32 @@ class TraderService(
     fun createTrader(username: String): TraderWithTradingAccountsDTO {
         val saxoClient = brokerClient.getSaxoClient()
 
+        val saxoAccountBalances = brokerClient.getSaxoAccountBalances(
+            saxoClient.clientKey,
+            saxoClient.defaultAccountKey
+        )
+
+        return saveTrader(
+            username,
+            saxoClient.clientKey,
+            saxoClient.defaultAccountKey,
+            saxoAccountBalances.cashAvailableForTrading
+        )
+    }
+
+    @Transactional
+    fun saveTrader(
+        username: String,
+        saxoClientKey: String,
+        saxoAccountKey: String,
+        cashAvailableForTrading: BigDecimal
+    ): TraderWithTradingAccountsDTO {
         val savedTrader = traderRepository.save(
             Trader.create(
                 username,
-                saxoClient.clientKey,
-                saxoClient.defaultAccountKey
+                saxoClientKey,
+                saxoAccountKey,
+                cashAvailableForTrading
             )
         )
 
@@ -45,7 +67,7 @@ class TraderService(
                 throw IllegalArgumentException("Cannot delete trader having account with holdings")
             }
 
-            if (it.cashAvailable.signum() != 0) {
+            if (it.cashAvailableForTrading.signum() != 0) {
                 throw IllegalArgumentException("Cannot delete trader with account cash balance")
             }
 

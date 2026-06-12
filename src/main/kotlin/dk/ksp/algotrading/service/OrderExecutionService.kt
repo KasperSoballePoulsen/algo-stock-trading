@@ -8,8 +8,8 @@ import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.mapper.toAccountTransactionType
 import dk.ksp.algotrading.repository.HoldingRepository
 import dk.ksp.algotrading.repository.OrderRepository
-import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 
 @Service
@@ -21,21 +21,33 @@ class OrderExecutionService(
 
     @Transactional
     fun completeOrder(
-        tradingAccount: TradingAccount,
-        symbol: String,
-        quantity: Long,
-        price: BigDecimal,
-        type: OrderType,
+        orderId: Long,
         orderStatus: OrderStatus
     ) {
-        val order = orderRepository.save(Order(symbol, type, quantity, price, orderStatus, tradingAccount))
-        updateHoldings(tradingAccount, symbol, quantity, type)
-        accountTransactionService.createOrderAccountTransaction(
-            tradingAccount,
-            type.toAccountTransactionType(),
-            price.multiply(quantity.toBigDecimal()),
-            order
-        )
+        val order = orderRepository.findByIdWithTradingAccount(orderId)
+            ?: throw IllegalArgumentException("Order not found")
+
+        order.status = orderStatus
+
+        if (orderStatus == OrderStatus.FILLED) {
+            updateHoldings(
+                order.tradingAccount,
+                order.symbol,
+                order.quantity,
+                order.type
+            )
+
+            accountTransactionService.createOrderAccountTransaction(
+                order.tradingAccount,
+                order.type.toAccountTransactionType(),
+                order.price.multiply(order.quantity.toBigDecimal()),
+                order
+            )
+        }
+
+        if (orderStatus == OrderStatus.REJECTED && order.type == OrderType.BUY) {
+            order.tradingAccount.cashAvailableForTrading += order.price.multiply(order.quantity.toBigDecimal())
+        }
     }
 
 
