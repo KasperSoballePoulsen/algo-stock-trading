@@ -2,18 +2,17 @@ package dk.ksp.algotrading.client
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.ksp.algotrading.dto.response.SaxoClientDTO
-import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.enum.OrderStatus
-import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.enum.BuySell
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import com.fasterxml.jackson.module.kotlin.readValue
 import dk.ksp.algotrading.dto.response.SaxoAccountBalancesDTO
+import dk.ksp.algotrading.enum.OrderType
 
 @Component
 class BrokerClient(
@@ -31,9 +30,47 @@ class BrokerClient(
         saxoAccountKey: String,
         symbol: String,
         quantity: Long,
-        price: BigDecimal,
-        type: OrderType
+        type: BuySell,
+        orderType: OrderType,
+        manualOrder: Boolean
     ): OrderStatus {
+
+        val uic = instrumentService.getUic(symbol)
+
+        val requestBody = mapOf(
+            "AccountKey" to saxoAccountKey,
+            "Amount" to quantity,
+            "BuySell" to if (type == BuySell.BUY) "Buy" else "Sell",
+            "OrderType" to if (orderType == OrderType.MARKET) "Market" else throw IllegalArgumentException("OrderType not supported"),
+            "ManualOrder" to manualOrder,
+            "Uic" to uic,
+            "AssetType" to "Stock",
+            "OrderDuration" to mapOf(
+                "DurationType" to "DayOrder"
+            )
+        )
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("$baseUrl/trade/v2/orders"))
+            .header("Authorization", "Bearer $saxoToken")
+            .header("Content-Type", "application/json")
+            .POST(
+                HttpRequest.BodyPublishers.ofString(
+                    objectMapper.writeValueAsString(requestBody)
+                )
+            )
+            .build()
+
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+
+        println(response.body())
+
+        if (response.statusCode() !in 200..299) {
+            throw IllegalStateException(
+                "Failed to send order. Status=${response.statusCode()}, Body=${response.body()}"
+            )
+        }
+
         return OrderStatus.FILLED
     }
 

@@ -2,11 +2,9 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.BrokerClient
 import dk.ksp.algotrading.dto.response.OrderDTO
-import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.enum.OrderStatus
-import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.enum.BuySell
 import dk.ksp.algotrading.exception.BrokerRejectedException
-import dk.ksp.algotrading.repository.HoldingRepository
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -24,7 +22,7 @@ class TradingService(
         symbol: String,
         quantity: Long,
         price: BigDecimal,
-        type: OrderType
+        type: BuySell
     ): OrderDTO {
 
         val tradingAccount = tradingAccountRepository.findActiveByIdWithTrader(tradingAccountId)
@@ -35,14 +33,14 @@ class TradingService(
             tradingAccount.saxoAccountKey
         )
 
-        val createdOrder = orderReservationService.reserveOrder(
-            tradingAccountId,
-            symbol,
-            quantity,
-            price,
-            type,
-            saxoBalances.cashAvailableForTrading
-        )
+//        val createdOrder = orderReservationService.reserveOrder(
+//            tradingAccountId,
+//            symbol,
+//            quantity,
+//            price,
+//            type,
+//            saxoBalances.cashAvailableForTrading
+//        )
 
         val status = try {
             brokerClient.sendOrder(
@@ -50,7 +48,6 @@ class TradingService(
                 tradingAccount.saxoAccountKey,
                 symbol,
                 quantity,
-                price,
                 type
             )
         } catch (ex: BrokerRejectedException) {

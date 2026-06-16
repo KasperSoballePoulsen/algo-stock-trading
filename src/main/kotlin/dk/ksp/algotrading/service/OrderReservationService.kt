@@ -2,7 +2,7 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.entity.Order
 import dk.ksp.algotrading.enum.OrderStatus
-import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.enum.BuySell
 import dk.ksp.algotrading.repository.OrderRepository
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import org.springframework.stereotype.Service
@@ -21,7 +21,7 @@ class OrderReservationService(
         symbol: String,
         quantity: Long,
         price: BigDecimal,
-        type: OrderType,
+        type: BuySell,
         cashAvailableForTrading: BigDecimal
     ): Order {
         val tradingAccount = tradingAccountRepository.findActiveByIdForUpdate(tradingAccountId)
@@ -31,7 +31,7 @@ class OrderReservationService(
 
         val orderValue = price.multiply(quantity.toBigDecimal())
 
-        if (type == OrderType.BUY) {
+        if (type == BuySell.BUY) {
             if (tradingAccount.cashAvailableForTrading < orderValue) {
                 throw IllegalArgumentException("Insufficient funds")
             }

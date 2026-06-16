@@ -1,16 +1,14 @@
 package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.entity.Holding
-import dk.ksp.algotrading.entity.Order
 import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.enum.OrderStatus
-import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.enum.BuySell
 import dk.ksp.algotrading.mapper.toAccountTransactionType
 import dk.ksp.algotrading.repository.HoldingRepository
 import dk.ksp.algotrading.repository.OrderRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 
 @Service
 class OrderExecutionService(
@@ -34,18 +32,18 @@ class OrderExecutionService(
                 order.tradingAccount,
                 order.symbol,
                 order.quantity,
-                order.type
+                order.buySell
             )
 
             accountTransactionService.createOrderAccountTransaction(
                 order.tradingAccount,
-                order.type.toAccountTransactionType(),
+                order.buySell.toAccountTransactionType(),
                 order.price.multiply(order.quantity.toBigDecimal()),
                 order
             )
         }
 
-        if (orderStatus == OrderStatus.REJECTED && order.type == OrderType.BUY) {
+        if (orderStatus == OrderStatus.REJECTED && order.buySell == BuySell.BUY) {
             order.tradingAccount.cashAvailableForTrading += order.price.multiply(order.quantity.toBigDecimal())
         }
     }
@@ -55,7 +53,7 @@ class OrderExecutionService(
         tradingAccount: TradingAccount,
         symbol: String,
         quantity: Long,
-        type: OrderType
+        type: BuySell
     ) {
 
         val normalizedSymbol = symbol.uppercase()
@@ -63,14 +61,14 @@ class OrderExecutionService(
         val existingHolding = holdingRepository.findActiveByAccountIdAndSymbol(tradingAccount.id, normalizedSymbol)
 
         when (type) {
-            OrderType.BUY -> {
+            BuySell.BUY -> {
                 if (existingHolding != null)
                     existingHolding.quantity += quantity
                 else
                     holdingRepository.save(Holding(normalizedSymbol, quantity, tradingAccount))
             }
 
-            OrderType.SELL -> {
+            BuySell.SELL -> {
                 if (existingHolding == null)
                     throw IllegalArgumentException("Cannot sell shares not owned")
 

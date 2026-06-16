@@ -1,10 +1,10 @@
 package dk.ksp.algotrading.mapper
 
 import dk.ksp.algotrading.enum.AccountTransactionType
-import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.enum.BuySell
 
-fun OrderType.toAccountTransactionType(): AccountTransactionType =
+fun BuySell.toAccountTransactionType(): AccountTransactionType =
     when (this) {
-        OrderType.BUY -> AccountTransactionType.BUY_ORDER
-        OrderType.SELL -> AccountTransactionType.SELL_ORDER
+        BuySell.BUY -> AccountTransactionType.BUY_ORDER
+        BuySell.SELL -> AccountTransactionType.SELL_ORDER
     }
