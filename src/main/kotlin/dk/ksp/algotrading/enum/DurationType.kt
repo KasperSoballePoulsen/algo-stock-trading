@@ -1,7 +1,7 @@
 package dk.ksp.algotrading.enum
 
-enum class OrderType(
+enum class DurationType(
     val saxoValue: String
 ) {
-    MARKET("Market")
+    DAY_ORDER("DayOrder")
 }

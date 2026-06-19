@@ -2,18 +2,21 @@ package dk.ksp.algotrading.client
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.ksp.algotrading.dto.response.SaxoClientDTO
-import dk.ksp.algotrading.entity.TradingAccount
-import dk.ksp.algotrading.enum.OrderStatus
-import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.enum.BuySell
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import com.fasterxml.jackson.module.kotlin.readValue
+import dk.ksp.algotrading.dto.request.OrderDuration
+import dk.ksp.algotrading.dto.request.SaxoOrderRequestDTO
 import dk.ksp.algotrading.dto.response.SaxoAccountBalancesDTO
+import dk.ksp.algotrading.dto.response.SaxoOrderErrorResponseDTO
+import dk.ksp.algotrading.dto.response.SaxoOrderSuccessResponseDTO
+import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.exception.BrokerRejectedException
 
 @Component
 class BrokerClient(
@@ -27,14 +30,55 @@ class BrokerClient(
 
 
     fun sendOrder(
-        saxoClientKey: String,
         saxoAccountKey: String,
-        symbol: String,
-        quantity: Long,
-        price: BigDecimal,
-        type: OrderType
-    ): OrderStatus {
-        return OrderStatus.FILLED
+        amount: Long,
+        buySell: BuySell,
+        orderType: OrderType,
+        manualOrder: Boolean,
+        uic: Long,
+        assetType: String,
+        orderDuration: OrderDuration
+    ): SaxoOrderSuccessResponseDTO {
+
+        val requestBody = SaxoOrderRequestDTO(
+            saxoAccountKey,
+            amount,
+            buySell.saxoValue,
+            orderType.saxoValue,
+            manualOrder,
+            uic,
+            assetType,
+            orderDuration
+        )
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("$baseUrl/trade/v2/orders"))
+            .header("Authorization", "Bearer $saxoToken")
+            .header("Content-Type", "application/json")
+            .POST(
+                HttpRequest.BodyPublishers.ofString(
+                    objectMapper.writeValueAsString(requestBody)
+                )
+            )
+            .build()
+
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val body = response.body()
+
+        if (response.statusCode() !in 200..299) {
+            val error = objectMapper.readValue<SaxoOrderErrorResponseDTO>(body)
+
+            throw BrokerRejectedException(
+                error.message ?: "Saxo rejected order",
+                error.errorCode,
+                error.modelState
+            )
+        }
+
+        val saxoOrder = objectMapper.readValue<SaxoOrderSuccessResponseDTO>(body)
+
+        return saxoOrder
+
     }
 
     fun getSaxoClient(): SaxoClientDTO {

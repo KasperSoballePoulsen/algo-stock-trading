@@ -1,97 +1,76 @@
 package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.BrokerClient
-import dk.ksp.algotrading.dto.response.OrderDTO
-import dk.ksp.algotrading.entity.TradingAccount
+import dk.ksp.algotrading.dto.request.OrderDuration
+import dk.ksp.algotrading.dto.response.SubmittedOrderDTO
+import dk.ksp.algotrading.entity.Order
+import dk.ksp.algotrading.enum.AssetType
+import dk.ksp.algotrading.enum.BuySell
+import dk.ksp.algotrading.enum.DurationType
+import dk.ksp.algotrading.enum.Instrument
+import dk.ksp.algotrading.enum.OrderInitiator
 import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
-import dk.ksp.algotrading.exception.BrokerRejectedException
-import dk.ksp.algotrading.repository.HoldingRepository
+import dk.ksp.algotrading.repository.OrderRepository
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 
 @Service
 class TradingService(
     private val tradingAccountRepository: TradingAccountRepository,
-    private val orderExecutionService: OrderExecutionService,
+    private val orderRepository: OrderRepository,
     private val brokerClient: BrokerClient,
-    private val orderReservationService: OrderReservationService
 ) {
 
     fun createOrder(
         tradingAccountId: Long,
         symbol: String,
         quantity: Long,
-        price: BigDecimal,
-        type: OrderType
-    ): OrderDTO {
+        buySell: BuySell,
+        orderType: OrderType,
+        initiator: OrderInitiator,
+        assetType: AssetType,
+        durationType: DurationType
+    ): SubmittedOrderDTO {
 
-        val tradingAccount = tradingAccountRepository.findActiveByIdWithTrader(tradingAccountId)
+        val tradingAccount = tradingAccountRepository.findActiveById(tradingAccountId)
             ?: throw IllegalArgumentException("Trading account not found")
 
-        val saxoBalances = brokerClient.getSaxoAccountBalances(
-            tradingAccount.trader.saxoClientKey,
-            tradingAccount.saxoAccountKey
-        )
+        if (quantity <= 0) throw IllegalArgumentException("Quantity must be positive")
+        if (symbol.isBlank()) throw IllegalArgumentException("Symbol is required")
 
-        val createdOrder = orderReservationService.reserveOrder(
-            tradingAccountId,
-            symbol,
-            quantity,
-            price,
-            type,
-            saxoBalances.cashAvailableForTrading
-        )
+        val normalizedSymbol = symbol.uppercase()
 
-        val status = try {
-            brokerClient.sendOrder(
-                tradingAccount.trader.saxoClientKey,
-                tradingAccount.saxoAccountKey,
-                symbol,
-                quantity,
-                price,
-                type
-            )
-        } catch (ex: BrokerRejectedException) {
-            OrderStatus.REJECTED
+        val isManualOrder = when (initiator) {
+            OrderInitiator.HUMAN -> true
+            OrderInitiator.ALGORITHM -> false
         }
+        val uic = Instrument.fromSymbol(normalizedSymbol)
 
-        orderExecutionService.completeOrder(createdOrder.id, status)
+        val saxoOrder = brokerClient.sendOrder(
+            tradingAccount.saxoAccountKey,
+            quantity,
+            buySell,
+            orderType,
+            isManualOrder,
+            uic,
+            assetType.saxoValue,
+            OrderDuration(durationType.saxoValue)
+        )
 
-        return OrderDTO(symbol, quantity, price, type, status)
+        val submittedStatus = OrderStatus.SUBMITTED;
+
+        orderRepository.save(Order(
+            symbol = normalizedSymbol,
+            uic = uic,
+            buySell = buySell,
+            quantity = quantity,
+            saxoOrderId = saxoOrder.orderId,
+            status = submittedStatus,
+            orderType = orderType,
+            tradingAccount = tradingAccount,
+        ))
+
+        return SubmittedOrderDTO(symbol, quantity, buySell, submittedStatus)
     }
-
-//    private fun validateOrder(
-//        tradingAccount: TradingAccount,
-//        symbol: String,
-//        quantity: Long,
-//        price: BigDecimal,
-//        type: OrderType
-//    ) {
-//        require(symbol.isNotBlank()) { "Symbol cannot be blank" }
-//        require(quantity > 0) { "Quantity must be greater than 0" }
-//        require(price > BigDecimal.ZERO) { "Price must be greater than 0" }
-//
-//        when (type) {
-//            OrderType.BUY -> {
-//                val totalPrice = price.multiply(quantity.toBigDecimal())
-//
-//                require(tradingAccount.cashAvailableForTrading >= totalPrice) {
-//                    "Cannot buy for more money than owned"
-//                }
-//            }
-//
-//            OrderType.SELL -> {
-//                val holding = holdingRepository
-//                    .findActiveByAccountIdAndSymbol(tradingAccount.id, symbol.uppercase())
-//                    ?: throw IllegalArgumentException("Cannot sell shares not owned")
-//
-//                require(holding.quantity >= quantity) {
-//                    "Cannot sell more shares than owned"
-//                }
-//            }
-//        }
-//    }
-
 }

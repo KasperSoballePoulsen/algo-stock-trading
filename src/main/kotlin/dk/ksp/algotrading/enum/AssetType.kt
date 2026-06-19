@@ -1,7 +1,7 @@
 package dk.ksp.algotrading.enum
 
-enum class OrderType(
+enum class AssetType(
     val saxoValue: String
 ) {
-    MARKET("Market")
+    STOCK("Stock")
 }

@@ -1,7 +1,8 @@
 package dk.ksp.algotrading.enum
 
-enum class OrderType(
+enum class BuySell(
     val saxoValue: String
 ) {
-    MARKET("Market")
+    BUY("Buy"),
+    SELL("Sell")
 }

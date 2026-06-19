@@ -1,6 +1,7 @@
 package dk.ksp.algotrading.entity
 
 import dk.ksp.algotrading.enum.OrderStatus
+import dk.ksp.algotrading.enum.BuySell
 import dk.ksp.algotrading.enum.OrderType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -23,17 +24,27 @@ class Order(
     val symbol: String,
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    val type: OrderType,
+    val uic: Long,
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    val buySell: BuySell,
+
+    @Column(nullable = false)
     val quantity: Long,
 
     @Column(nullable = false)
-    val price: BigDecimal,
+    val saxoOrderId: Long,
+
+    val executedPrice: BigDecimal? = null,
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     var status: OrderStatus,
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    var orderType: OrderType,
 
     @ManyToOne
     @JoinColumn(name = "trading_account_id", nullable = false)
