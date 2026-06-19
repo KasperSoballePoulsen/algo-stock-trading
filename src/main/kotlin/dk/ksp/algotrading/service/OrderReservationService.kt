@@ -15,32 +15,32 @@ class OrderReservationService(
     private val orderRepository: OrderRepository
 ) {
 
-    @Transactional
-    fun reserveOrder(
-        tradingAccountId: Long,
-        symbol: String,
-        quantity: Long,
-        price: BigDecimal,
-        type: BuySell,
-        cashAvailableForTrading: BigDecimal
-    ): Order {
-        val tradingAccount = tradingAccountRepository.findActiveByIdForUpdate(tradingAccountId)
-            ?: throw IllegalArgumentException("Trading account not found")
-
-        tradingAccount.cashAvailableForTrading = cashAvailableForTrading
-
-        val orderValue = price.multiply(quantity.toBigDecimal())
-
-        if (type == BuySell.BUY) {
-            if (tradingAccount.cashAvailableForTrading < orderValue) {
-                throw IllegalArgumentException("Insufficient funds")
-            }
-
-            tradingAccount.cashAvailableForTrading -= orderValue
-        }
-
-        return orderRepository.save(
-            Order(symbol, type, quantity, price, OrderStatus.CREATED, tradingAccount)
-        )
-    }
+//    @Transactional
+//    fun reserveOrder(
+//        tradingAccountId: Long,
+//        symbol: String,
+//        quantity: Long,
+//        price: BigDecimal,
+//        type: BuySell,
+//        cashAvailableForTrading: BigDecimal
+//    ): Order {
+//        val tradingAccount = tradingAccountRepository.findActiveByIdForUpdate(tradingAccountId)
+//            ?: throw IllegalArgumentException("Trading account not found")
+//
+//        tradingAccount.cashAvailableForTrading = cashAvailableForTrading
+//
+//        val orderValue = price.multiply(quantity.toBigDecimal())
+//
+//        if (type == BuySell.BUY) {
+//            if (tradingAccount.cashAvailableForTrading < orderValue) {
+//                throw IllegalArgumentException("Insufficient funds")
+//            }
+//
+//            tradingAccount.cashAvailableForTrading -= orderValue
+//        }
+//
+//        return orderRepository.save(
+//            Order(symbol, type, quantity, price, OrderStatus.SUBMITTED, tradingAccount)
+//        )
+//    }
 }

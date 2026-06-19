@@ -2,7 +2,6 @@ package dk.ksp.algotrading.client
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.ksp.algotrading.dto.response.SaxoClientDTO
-import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.BuySell
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -16,8 +15,6 @@ import dk.ksp.algotrading.dto.request.SaxoOrderRequestDTO
 import dk.ksp.algotrading.dto.response.SaxoAccountBalancesDTO
 import dk.ksp.algotrading.dto.response.SaxoOrderErrorResponseDTO
 import dk.ksp.algotrading.dto.response.SaxoOrderSuccessResponseDTO
-import dk.ksp.algotrading.enum.AssetType
-import dk.ksp.algotrading.enum.DurationType
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.exception.BrokerRejectedException
 
@@ -41,7 +38,7 @@ class BrokerClient(
         uic: Long,
         assetType: String,
         orderDuration: OrderDuration
-    ): Long {
+    ): SaxoOrderSuccessResponseDTO {
 
         val requestBody = SaxoOrderRequestDTO(
             saxoAccountKey,
@@ -72,15 +69,15 @@ class BrokerClient(
             val error = objectMapper.readValue<SaxoOrderErrorResponseDTO>(body)
 
             throw BrokerRejectedException(
-                message = error.message ?: "Saxo rejected order",
-                errorCode = error.errorCode,
-                modelState = error.modelState
+                error.message ?: "Saxo rejected order",
+                error.errorCode,
+                error.modelState
             )
         }
 
-        val success = objectMapper.readValue<SaxoOrderSuccessResponseDTO>(body)
+        val saxoOrder = objectMapper.readValue<SaxoOrderSuccessResponseDTO>(body)
 
-        return success.orderId
+        return saxoOrder
 
     }
 

@@ -17,36 +17,36 @@ class OrderExecutionService(
     private val accountTransactionService: AccountTransactionService,
 ) {
 
-    @Transactional
-    fun completeOrder(
-        orderId: Long,
-        orderStatus: OrderStatus
-    ) {
-        val order = orderRepository.findByIdWithTradingAccount(orderId)
-            ?: throw IllegalArgumentException("Order not found")
-
-        order.status = orderStatus
-
-        if (orderStatus == OrderStatus.FILLED) {
-            updateHoldings(
-                order.tradingAccount,
-                order.symbol,
-                order.quantity,
-                order.buySell
-            )
-
-            accountTransactionService.createOrderAccountTransaction(
-                order.tradingAccount,
-                order.buySell.toAccountTransactionType(),
-                order.price.multiply(order.quantity.toBigDecimal()),
-                order
-            )
-        }
-
-        if (orderStatus == OrderStatus.REJECTED && order.buySell == BuySell.BUY) {
-            order.tradingAccount.cashAvailableForTrading += order.price.multiply(order.quantity.toBigDecimal())
-        }
-    }
+//    @Transactional
+//    fun completeOrder(
+//        orderId: Long,
+//        orderStatus: OrderStatus
+//    ) {
+//        val order = orderRepository.findByIdWithTradingAccount(orderId)
+//            ?: throw IllegalArgumentException("Order not found")
+//
+//        order.status = orderStatus
+//
+//        if (orderStatus == OrderStatus.FILLED) {
+//            updateHoldings(
+//                order.tradingAccount,
+//                order.symbol,
+//                order.quantity,
+//                order.buySell
+//            )
+//
+//            accountTransactionService.createOrderAccountTransaction(
+//                order.tradingAccount,
+//                order.buySell.toAccountTransactionType(),
+//                order.price.multiply(order.quantity.toBigDecimal()),
+//                order
+//            )
+//        }
+//
+//        if (orderStatus == OrderStatus.REJECTED && order.buySell == BuySell.BUY) {
+//            order.tradingAccount.cashAvailableForTrading += order.price.multiply(order.quantity.toBigDecimal())
+//        }
+//    }
 
 
     private fun updateHoldings(

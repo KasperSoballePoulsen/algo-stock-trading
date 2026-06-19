@@ -24,6 +24,9 @@ class Order(
     val symbol: String,
 
     @Column(nullable = false)
+    val uic: Long,
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     val buySell: BuySell,
 
@@ -33,8 +36,7 @@ class Order(
     @Column(nullable = false)
     val saxoOrderId: Long,
 
-    @Column
-    val executedPrice: BigDecimal?,
+    val executedPrice: BigDecimal? = null,
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
