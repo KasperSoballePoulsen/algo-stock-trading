@@ -27,7 +27,11 @@ class Order(
     @Enumerated(EnumType.STRING)
     val buySell: BuySell,
 
+    @Column(nullable = false)
     val quantity: Long,
+
+    @Column(nullable = false)
+    val saxoOrderId: Long,
 
     @Column
     val executedPrice: BigDecimal?,

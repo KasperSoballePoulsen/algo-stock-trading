@@ -1,8 +1,7 @@
 package dk.ksp.algotrading.enum
 
-enum class BuySell(
+enum class AssetType(
     val saxoValue: String
 ) {
-    BUY("Buy"),
-    SELL("Sell")
+    STOCK("Stock")
 }

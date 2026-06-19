@@ -1,8 +1,7 @@
 package dk.ksp.algotrading.enum
 
-enum class BuySell(
+enum class DurationType(
     val saxoValue: String
 ) {
-    BUY("Buy"),
-    SELL("Sell")
+    DAY_ORDER("DayOrder")
 }

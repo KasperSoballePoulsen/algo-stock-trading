@@ -11,8 +11,15 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import com.fasterxml.jackson.module.kotlin.readValue
+import dk.ksp.algotrading.dto.request.OrderDuration
+import dk.ksp.algotrading.dto.request.SaxoOrderRequestDTO
 import dk.ksp.algotrading.dto.response.SaxoAccountBalancesDTO
+import dk.ksp.algotrading.dto.response.SaxoOrderErrorResponseDTO
+import dk.ksp.algotrading.dto.response.SaxoOrderSuccessResponseDTO
+import dk.ksp.algotrading.enum.AssetType
+import dk.ksp.algotrading.enum.DurationType
 import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.exception.BrokerRejectedException
 
 @Component
 class BrokerClient(
@@ -26,28 +33,25 @@ class BrokerClient(
 
 
     fun sendOrder(
-        saxoClientKey: String,
         saxoAccountKey: String,
-        symbol: String,
-        quantity: Long,
-        type: BuySell,
+        amount: Long,
+        buySell: BuySell,
         orderType: OrderType,
-        manualOrder: Boolean
-    ): OrderStatus {
+        manualOrder: Boolean,
+        uic: Long,
+        assetType: String,
+        orderDuration: OrderDuration
+    ): Long {
 
-        val uic = instrumentService.getUic(symbol)
-
-        val requestBody = mapOf(
-            "AccountKey" to saxoAccountKey,
-            "Amount" to quantity,
-            "BuySell" to if (type == BuySell.BUY) "Buy" else "Sell",
-            "OrderType" to if (orderType == OrderType.MARKET) "Market" else throw IllegalArgumentException("OrderType not supported"),
-            "ManualOrder" to manualOrder,
-            "Uic" to uic,
-            "AssetType" to "Stock",
-            "OrderDuration" to mapOf(
-                "DurationType" to "DayOrder"
-            )
+        val requestBody = SaxoOrderRequestDTO(
+            saxoAccountKey,
+            amount,
+            buySell.saxoValue,
+            orderType.saxoValue,
+            manualOrder,
+            uic,
+            assetType,
+            orderDuration
         )
 
         val request = HttpRequest.newBuilder()
@@ -62,16 +66,22 @@ class BrokerClient(
             .build()
 
         val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-
-        println(response.body())
+        val body = response.body()
 
         if (response.statusCode() !in 200..299) {
-            throw IllegalStateException(
-                "Failed to send order. Status=${response.statusCode()}, Body=${response.body()}"
+            val error = objectMapper.readValue<SaxoOrderErrorResponseDTO>(body)
+
+            throw BrokerRejectedException(
+                message = error.message ?: "Saxo rejected order",
+                errorCode = error.errorCode,
+                modelState = error.modelState
             )
         }
 
-        return OrderStatus.FILLED
+        val success = objectMapper.readValue<SaxoOrderSuccessResponseDTO>(body)
+
+        return success.orderId
+
     }
 
     fun getSaxoClient(): SaxoClientDTO {

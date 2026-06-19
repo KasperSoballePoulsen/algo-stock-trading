@@ -1,58 +1,56 @@
 package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.BrokerClient
+import dk.ksp.algotrading.dto.request.OrderDuration
 import dk.ksp.algotrading.dto.response.OrderDTO
-import dk.ksp.algotrading.enum.OrderStatus
+import dk.ksp.algotrading.enum.AssetType
 import dk.ksp.algotrading.enum.BuySell
-import dk.ksp.algotrading.exception.BrokerRejectedException
+import dk.ksp.algotrading.enum.DurationType
+import dk.ksp.algotrading.enum.Instrument
+import dk.ksp.algotrading.enum.OrderInitiator
+import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 
 @Service
 class TradingService(
     private val tradingAccountRepository: TradingAccountRepository,
     private val orderExecutionService: OrderExecutionService,
     private val brokerClient: BrokerClient,
-    private val orderReservationService: OrderReservationService
 ) {
 
     fun createOrder(
         tradingAccountId: Long,
         symbol: String,
         quantity: Long,
-        price: BigDecimal,
-        type: BuySell
+        buySell: BuySell,
+        orderType: OrderType,
+        initiator: OrderInitiator
     ): OrderDTO {
 
-        val tradingAccount = tradingAccountRepository.findActiveByIdWithTrader(tradingAccountId)
+        val tradingAccount = tradingAccountRepository.findActiveById(tradingAccountId)
             ?: throw IllegalArgumentException("Trading account not found")
 
-        val saxoBalances = brokerClient.getSaxoAccountBalances(
-            tradingAccount.trader.saxoClientKey,
-            tradingAccount.saxoAccountKey
+        if (quantity <= 0) throw IllegalArgumentException("Quantity must be positive")
+        if (symbol.isBlank()) throw IllegalArgumentException("Symbol is required")
+
+        val isManualOrder = when (initiator) {
+            OrderInitiator.HUMAN -> true
+            OrderInitiator.ALGORITHM -> false
+        }
+        val uic = Instrument.fromSymbol(symbol.uppercase())
+
+        val orderId = brokerClient.sendOrder(
+            tradingAccount.saxoAccountKey,
+            quantity,
+            buySell,
+            orderType,
+            isManualOrder,
+            uic,
+            AssetType.STOCK.saxoValue,
+            OrderDuration(DurationType.DAY_ORDER.saxoValue)
         )
 
-//        val createdOrder = orderReservationService.reserveOrder(
-//            tradingAccountId,
-//            symbol,
-//            quantity,
-//            price,
-//            type,
-//            saxoBalances.cashAvailableForTrading
-//        )
-
-        val status = try {
-            brokerClient.sendOrder(
-                tradingAccount.trader.saxoClientKey,
-                tradingAccount.saxoAccountKey,
-                symbol,
-                quantity,
-                type
-            )
-        } catch (ex: BrokerRejectedException) {
-            OrderStatus.REJECTED
-        }
 
         orderExecutionService.completeOrder(createdOrder.id, status)
 

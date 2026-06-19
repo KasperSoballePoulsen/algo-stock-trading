@@ -31,8 +31,9 @@ class TradingAccountController(
             tradingAccountId,
             request.symbol,
             request.quantity,
-            request.price,
-            request.type
+            request.buySell,
+            request.orderType,
+            request.initiator
         )
     }
 
