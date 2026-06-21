@@ -23,7 +23,6 @@ class TradingService(
 ) {
 
     fun createOrder(
-        tradingAccountId: Long,
         symbol: String,
         quantity: Long,
         buySell: BuySell,
@@ -33,8 +32,7 @@ class TradingService(
         durationType: DurationType
     ): SubmittedOrderDTO {
 
-        val tradingAccount = tradingAccountRepository.findActiveById(tradingAccountId)
-            ?: throw IllegalArgumentException("Trading account not found")
+        val tradingAccount = tradingAccountRepository.getTradingAccount()
 
         if (quantity <= 0) throw IllegalArgumentException("Quantity must be positive")
         if (symbol.isBlank()) throw IllegalArgumentException("Symbol is required")

@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional
 class OrderExecutionService(
     private val holdingRepository: HoldingRepository,
     private val orderRepository: OrderRepository,
-    private val accountTransactionService: AccountTransactionService,
 ) {
 
 //    @Transactional
@@ -49,37 +48,37 @@ class OrderExecutionService(
 //    }
 
 
-    private fun updateHoldings(
-        tradingAccount: TradingAccount,
-        symbol: String,
-        quantity: Long,
-        type: BuySell
-    ) {
-
-        val normalizedSymbol = symbol.uppercase()
-
-        val existingHolding = holdingRepository.findActiveByAccountIdAndSymbol(tradingAccount.id, normalizedSymbol)
-
-        when (type) {
-            BuySell.BUY -> {
-                if (existingHolding != null)
-                    existingHolding.quantity += quantity
-                else
-                    holdingRepository.save(Holding(normalizedSymbol, quantity, tradingAccount))
-            }
-
-            BuySell.SELL -> {
-                if (existingHolding == null)
-                    throw IllegalArgumentException("Cannot sell shares not owned")
-
-                if (existingHolding.quantity < quantity)
-                    throw IllegalArgumentException("Cannot sell more shares than owned")
-
-                existingHolding.quantity -= quantity
-
-                if (existingHolding.quantity == 0L)
-                    holdingRepository.delete(existingHolding)
-            }
-        }
-    }
+//    private fun updateHoldings(
+//        tradingAccount: TradingAccount,
+//        symbol: String,
+//        quantity: Long,
+//        type: BuySell
+//    ) {
+//
+//        val normalizedSymbol = symbol.uppercase()
+//
+//        val existingHolding = holdingRepository.findActiveByAccountIdAndSymbol(tradingAccount.id, normalizedSymbol)
+//
+//        when (type) {
+//            BuySell.BUY -> {
+//                if (existingHolding != null)
+//                    existingHolding.quantity += quantity
+//                else
+//                    holdingRepository.save(Holding(normalizedSymbol, quantity, tradingAccount))
+//            }
+//
+//            BuySell.SELL -> {
+//                if (existingHolding == null)
+//                    throw IllegalArgumentException("Cannot sell shares not owned")
+//
+//                if (existingHolding.quantity < quantity)
+//                    throw IllegalArgumentException("Cannot sell more shares than owned")
+//
+//                existingHolding.quantity -= quantity
+//
+//                if (existingHolding.quantity == 0L)
+//                    holdingRepository.delete(existingHolding)
+//            }
+//        }
+//    }
 }

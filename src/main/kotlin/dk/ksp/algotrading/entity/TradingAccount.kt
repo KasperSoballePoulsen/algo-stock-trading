@@ -9,31 +9,21 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import java.math.BigDecimal
 import java.time.Instant
 
 @Entity
 @Table(name = "trading_accounts")
-class TradingAccount(
-
-    @Column(nullable = false)
-    var cashAvailableForTrading: BigDecimal,
+class TradingAccount protected constructor(
 
     @Column(nullable = false)
     val saxoAccountKey: String,
 
-    @ManyToOne
-    @JoinColumn(name = "trader_id", nullable = false)
+    @OneToOne(cascade = [CascadeType.PERSIST])
+    @JoinColumn(name = "trader_id", nullable = false, unique = true)
     val trader: Trader,
-
-    var deletedAt: Instant? = null,
-
-    @OneToMany(cascade = [CascadeType.PERSIST], mappedBy = "tradingAccount")
-    var holdings: MutableList<Holding> = mutableListOf(),
-
-    @OneToMany(cascade = [CascadeType.PERSIST], mappedBy = "tradingAccount")
-    var orders: MutableList<Order> = mutableListOf(),
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,4 +35,16 @@ class TradingAccount(
         get() = requireNotNull(_id) {
             "Cannot access id of a TradingAccount that has not been persisted"
         }
+
+    companion object {
+        fun createWithTrader(
+            username: String,
+            saxoClientKey: String,
+            saxoAccountKey: String
+        ): TradingAccount {
+            val trader = Trader.createForAccount(username, saxoClientKey)
+
+            return TradingAccount(saxoAccountKey, trader)
+        }
+    }
 }

@@ -7,13 +7,13 @@ import org.springframework.data.jpa.repository.Query
 interface OrderRepository : JpaRepository<Order, Long> {
 
 
-    @Query(
-        """
-    SELECT o
-    FROM Order o
-    JOIN FETCH o.tradingAccount ta
-    WHERE o.id = :orderId
-    """
-    )
-    fun findByIdWithTradingAccount(orderId: Long): Order?
+//    @Query(
+//        """
+//    SELECT o
+//    FROM Order o
+//    JOIN FETCH o.tradingAccount ta
+//    WHERE o.id = :orderId
+//    """
+//    )
+//    fun findByIdWithTradingAccount(orderId: Long): Order?
 }

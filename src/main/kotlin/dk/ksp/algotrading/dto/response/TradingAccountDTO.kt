@@ -4,5 +4,5 @@ import java.math.BigDecimal
 
 data class TradingAccountDTO(
     val accountId: Long,
-    val cashAvailable: BigDecimal,
+    val cashAvailableForTrading: BigDecimal,
 )
