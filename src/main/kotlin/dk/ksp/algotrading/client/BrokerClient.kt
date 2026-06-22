@@ -70,8 +70,8 @@ class BrokerClient(
             val error = objectMapper.readValue<SaxoOrderErrorResponseDTO>(body)
 
             throw BrokerRejectedException(
-                error.message ?: "Saxo rejected order",
-                error.errorCode,
+                error.resolvedMessage,
+                error.resolvedErrorCode,
                 error.modelState
             )
         }
