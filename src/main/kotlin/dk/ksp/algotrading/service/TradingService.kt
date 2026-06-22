@@ -11,6 +11,7 @@ import dk.ksp.algotrading.enum.Instrument
 import dk.ksp.algotrading.enum.OrderInitiator
 import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
+import dk.ksp.algotrading.exception.BrokerRejectedException
 import dk.ksp.algotrading.repository.OrderRepository
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import org.springframework.stereotype.Service
@@ -45,30 +46,47 @@ class TradingService(
         }
         val uic = Instrument.fromSymbol(normalizedSymbol)
 
-        val saxoOrder = brokerClient.sendOrder(
-            tradingAccount.saxoAccountKey,
-            quantity,
-            buySell,
-            orderType,
-            isManualOrder,
-            uic,
-            assetType.saxoValue,
-            OrderDuration(durationType.saxoValue)
-        )
+        return try {
+            val saxoOrder = brokerClient.sendOrder(
+                tradingAccount.saxoAccountKey,
+                quantity,
+                buySell,
+                orderType,
+                isManualOrder,
+                uic,
+                assetType.saxoValue,
+                OrderDuration(durationType.saxoValue)
+            )
 
-        val submittedStatus = OrderStatus.SUBMITTED;
+            val submittedStatus = OrderStatus.SUBMITTED
 
-        orderRepository.save(Order(
-            symbol = normalizedSymbol,
-            uic = uic,
-            buySell = buySell,
-            quantity = quantity,
-            saxoOrderId = saxoOrder.orderId,
-            status = submittedStatus,
-            orderType = orderType,
-            tradingAccount = tradingAccount,
-        ))
+            orderRepository.save(
+                Order(
+                    symbol = normalizedSymbol,
+                    uic = uic,
+                    buySell = buySell,
+                    quantity = quantity,
+                    saxoOrderId = saxoOrder.orderId,
+                    status = submittedStatus,
+                    orderType = orderType,
+                    tradingAccount = tradingAccount,
+                )
+            )
 
-        return SubmittedOrderDTO(symbol, quantity, buySell, submittedStatus)
+            SubmittedOrderDTO(symbol, quantity, buySell, submittedStatus)
+        } catch (ex: BrokerRejectedException) {
+            orderRepository.save(
+                Order(
+                    symbol = normalizedSymbol,
+                    uic = uic,
+                    buySell = buySell,
+                    quantity = quantity,
+                    status = OrderStatus.REJECTED,
+                    orderType = orderType,
+                    tradingAccount = tradingAccount,
+                )
+            )
+            throw ex
+        }
     }
 }
