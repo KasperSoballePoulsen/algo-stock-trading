@@ -1,14 +1,8 @@
 package dk.ksp.algotrading.service
 
-import dk.ksp.algotrading.entity.Holding
-import dk.ksp.algotrading.entity.TradingAccount
-import dk.ksp.algotrading.enum.OrderStatus
-import dk.ksp.algotrading.enum.BuySell
-import dk.ksp.algotrading.mapper.toAccountTransactionType
 import dk.ksp.algotrading.repository.HoldingRepository
 import dk.ksp.algotrading.repository.OrderRepository
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class OrderExecutionService(

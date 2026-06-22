@@ -13,6 +13,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import dk.ksp.algotrading.dto.request.OrderDuration
 import dk.ksp.algotrading.dto.request.SaxoOrderRequestDTO
 import dk.ksp.algotrading.dto.response.SaxoAccountBalancesDTO
+import dk.ksp.algotrading.dto.response.SaxoNetPositionsResponse
 import dk.ksp.algotrading.dto.response.SaxoOrderErrorResponseDTO
 import dk.ksp.algotrading.dto.response.SaxoOrderSuccessResponseDTO
 import dk.ksp.algotrading.enum.OrderType
@@ -116,6 +117,28 @@ class BrokerClient(
         }
 
         return objectMapper.readValue<SaxoAccountBalancesDTO>(response.body())
+    }
+
+    fun getNetPositions(
+        saxoClientKey: String,
+        saxoAccountKey: String
+    ): SaxoNetPositionsResponse {
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("$baseUrl/port/v1/netpositions?AccountKey=$saxoAccountKey&ClientKey=$saxoClientKey"))
+            .header("Authorization", "Bearer $saxoToken")
+            .GET()
+            .build()
+
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+
+        if (response.statusCode() != 200) {
+            throw IllegalStateException(
+                "Failed to fetch Saxo net positions. Status=${response.statusCode()}, Body=${response.body()}"
+            )
+        }
+
+        return objectMapper.readValue<SaxoNetPositionsResponse>(response.body())
     }
 
 }

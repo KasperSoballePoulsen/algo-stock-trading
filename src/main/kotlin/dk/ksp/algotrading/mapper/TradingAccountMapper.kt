@@ -1,7 +1,9 @@
 package dk.ksp.algotrading.mapper
 
+import dk.ksp.algotrading.dto.response.PortfolioDTO
 import dk.ksp.algotrading.dto.response.TraderWithTradingAccountDTO
 import dk.ksp.algotrading.dto.response.TradingAccountDTO
+import dk.ksp.algotrading.entity.Holding
 import dk.ksp.algotrading.entity.TradingAccount
 import java.math.BigDecimal
 
@@ -15,4 +17,9 @@ fun TradingAccount.toTraderWithTradingAccountDTO(cashAvailableForTrading: BigDec
 fun TradingAccount.toTradingAccountDTO(cashAvailableForTrading: BigDecimal) = TradingAccountDTO(
     accountId = id,
     cashAvailableForTrading = cashAvailableForTrading
+)
+
+fun TradingAccount.toPortfolioDTO(holdings: List<Holding>) = PortfolioDTO(
+    accountId = id,
+    holdings = holdings.toHoldingsDTO()
 )
