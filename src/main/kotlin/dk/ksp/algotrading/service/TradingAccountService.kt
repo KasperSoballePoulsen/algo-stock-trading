@@ -1,6 +1,6 @@
 package dk.ksp.algotrading.service
 
-import dk.ksp.algotrading.client.BrokerClient
+import dk.ksp.algotrading.client.SaxoClient
 import dk.ksp.algotrading.dto.response.PortfolioDTO
 import dk.ksp.algotrading.mapper.toPortfolioDTO
 import dk.ksp.algotrading.repository.TradingAccountRepository
@@ -9,14 +9,14 @@ import org.springframework.stereotype.Service
 @Service
 class TradingAccountService(
     private val tradingAccountRepository: TradingAccountRepository,
-    private val brokerClient: BrokerClient,
+    private val saxoClient: SaxoClient,
     private val holdingService: HoldingService
 ) {
     fun getPortfolio(syncWithSaxo: Boolean = false): PortfolioDTO {
         val account = tradingAccountRepository.getTradingAccount()
 
         val holdings = if (syncWithSaxo) {
-            val saxoNetPositions = brokerClient.getNetPositions(
+            val saxoNetPositions = saxoClient.getNetPositions(
                 account.trader.saxoClientKey, account.saxoAccountKey
             ).data
 

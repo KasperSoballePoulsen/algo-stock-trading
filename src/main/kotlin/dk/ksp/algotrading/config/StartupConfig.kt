@@ -1,6 +1,6 @@
 package dk.ksp.algotrading.config
 
-import dk.ksp.algotrading.client.BrokerClient
+import dk.ksp.algotrading.client.SaxoClient
 import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import org.slf4j.LoggerFactory
@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class StartupConfig(
-    private val brokerClient: BrokerClient,
+    private val saxoClient: SaxoClient,
     private val tradingAccountRepository: TradingAccountRepository
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -19,7 +19,7 @@ class StartupConfig(
     fun initTrader() = CommandLineRunner {
         if (tradingAccountRepository.count() == 0L) {
             logger.info("Initializing trader in database")
-            val saxoClient = brokerClient.getSaxoClient()
+            val saxoClient = saxoClient.getSaxoClient()
 
             tradingAccountRepository.save(
                 TradingAccount.createWithTrader(

@@ -20,7 +20,7 @@ import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.exception.BrokerRejectedException
 
 @Component
-class BrokerClient(
+class SaxoClient(
     @Value("\${saxo-sim-api.api-token}")
     private val saxoToken: String,
     @Value("\${saxo-sim-api.base-url}")
@@ -140,5 +140,8 @@ class BrokerClient(
 
         return objectMapper.readValue<SaxoNetPositionsResponse>(response.body())
     }
+
+
+
 
 }

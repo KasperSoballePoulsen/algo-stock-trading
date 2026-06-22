@@ -1,6 +1,6 @@
 package dk.ksp.algotrading.service
 
-import dk.ksp.algotrading.client.BrokerClient
+import dk.ksp.algotrading.client.SaxoClient
 import dk.ksp.algotrading.dto.saxo.request.OrderDuration
 import dk.ksp.algotrading.dto.response.SubmittedOrderDTO
 import dk.ksp.algotrading.entity.Order
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service
 class TradingService(
     private val tradingAccountRepository: TradingAccountRepository,
     private val orderRepository: OrderRepository,
-    private val brokerClient: BrokerClient,
+    private val saxoClient: SaxoClient,
 ) {
 
     fun createOrder(
@@ -47,7 +47,7 @@ class TradingService(
         val uic = Instrument.fromSymbol(normalizedSymbol)
 
         return try {
-            val saxoOrder = brokerClient.sendOrder(
+            val saxoOrder = saxoClient.sendOrder(
                 tradingAccount.saxoAccountKey,
                 quantity,
                 buySell,
