@@ -1,7 +1,6 @@
 package dk.ksp.algotrading.service
 
-import dk.ksp.algotrading.dto.response.HoldingDTO
-import dk.ksp.algotrading.dto.response.SaxoNetPosition
+import dk.ksp.algotrading.dto.saxo.response.SaxoNetPosition
 import dk.ksp.algotrading.entity.Holding
 import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.mapper.toHoldings

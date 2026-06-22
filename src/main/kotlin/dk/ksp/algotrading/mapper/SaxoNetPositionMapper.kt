@@ -1,6 +1,6 @@
 package dk.ksp.algotrading.mapper
 
-import dk.ksp.algotrading.dto.response.SaxoNetPosition
+import dk.ksp.algotrading.dto.saxo.response.SaxoNetPosition
 import dk.ksp.algotrading.entity.Holding
 import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.enum.Instrument

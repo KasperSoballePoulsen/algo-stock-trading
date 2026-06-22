@@ -1,7 +1,7 @@
 package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.BrokerClient
-import dk.ksp.algotrading.dto.request.OrderDuration
+import dk.ksp.algotrading.dto.saxo.request.OrderDuration
 import dk.ksp.algotrading.dto.response.SubmittedOrderDTO
 import dk.ksp.algotrading.entity.Order
 import dk.ksp.algotrading.enum.AssetType

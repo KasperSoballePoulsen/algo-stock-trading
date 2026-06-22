@@ -2,7 +2,7 @@ package dk.ksp.algotrading.client
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import dk.ksp.algotrading.dto.response.QuoteDataDTO
+import dk.ksp.algotrading.dto.marketdata.response.QuoteDataDTO
 import dk.ksp.algotrading.exception.MarketDataException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component

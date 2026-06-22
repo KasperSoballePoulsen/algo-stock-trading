@@ -1,7 +1,7 @@
 package dk.ksp.algotrading.client
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import dk.ksp.algotrading.dto.response.SaxoClientDTO
+import dk.ksp.algotrading.dto.saxo.response.SaxoClientDTO
 import dk.ksp.algotrading.enum.BuySell
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -10,12 +10,12 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import com.fasterxml.jackson.module.kotlin.readValue
-import dk.ksp.algotrading.dto.request.OrderDuration
-import dk.ksp.algotrading.dto.request.SaxoOrderRequestDTO
-import dk.ksp.algotrading.dto.response.SaxoAccountBalancesDTO
-import dk.ksp.algotrading.dto.response.SaxoNetPositionsResponse
-import dk.ksp.algotrading.dto.response.SaxoOrderErrorResponseDTO
-import dk.ksp.algotrading.dto.response.SaxoOrderSuccessResponseDTO
+import dk.ksp.algotrading.dto.saxo.request.OrderDuration
+import dk.ksp.algotrading.dto.saxo.request.SaxoOrderRequestDTO
+import dk.ksp.algotrading.dto.saxo.response.SaxoAccountBalancesDTO
+import dk.ksp.algotrading.dto.saxo.response.SaxoNetPositionsResponse
+import dk.ksp.algotrading.dto.saxo.response.SaxoOrderErrorResponseDTO
+import dk.ksp.algotrading.dto.saxo.response.SaxoOrderSuccessResponseDTO
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.exception.BrokerRejectedException
 

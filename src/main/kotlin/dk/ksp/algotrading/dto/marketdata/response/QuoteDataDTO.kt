@@ -1,4 +1,4 @@
-package dk.ksp.algotrading.dto.response
+package dk.ksp.algotrading.dto.marketdata.response
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal

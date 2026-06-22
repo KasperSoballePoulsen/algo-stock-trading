@@ -1,4 +1,4 @@
-package dk.ksp.algotrading.dto.request
+package dk.ksp.algotrading.dto.saxo.request
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
