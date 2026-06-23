@@ -16,9 +16,10 @@ class MarketDataClient(
     @Value("\${finnhub.base-url}")
     private val baseUrl: String,
     @Value("\${finnhub.api-key}")
-    private val apiKey: String
+    private val apiKey: String,
+    private val client: HttpClient
 ) {
-    private val client = HttpClient.newHttpClient()
+
     private val objectMapper = jacksonObjectMapper()
 
     fun fetchRealTimeQuoteData(symbol: String): QuoteDataDTO {
