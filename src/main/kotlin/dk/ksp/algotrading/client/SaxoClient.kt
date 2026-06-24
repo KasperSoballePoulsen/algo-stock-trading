@@ -26,8 +26,9 @@ class SaxoClient(
     @Value("\${saxo-sim-api.base-url}")
     private val baseUrl: String,
     private val objectMapper: ObjectMapper,
+    private val client: HttpClient
 ) {
-    private val client = HttpClient.newHttpClient()
+
 
 
     fun sendOrder(

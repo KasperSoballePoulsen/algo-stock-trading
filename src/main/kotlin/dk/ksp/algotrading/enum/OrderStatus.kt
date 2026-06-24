@@ -1,7 +1,8 @@
 package dk.ksp.algotrading.enum
 
 enum class OrderStatus {
-    SUBMITTED,
+    CREATED,
+    PLACED,
     FILLED,
-    REJECTED,
+    REJECTED
 }

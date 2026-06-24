@@ -1,22 +1,21 @@
 package dk.ksp.algotrading.service
 
-import dk.ksp.algotrading.client.MarketDataClient
+
 import dk.ksp.algotrading.client.NotificationClient
-import dk.ksp.algotrading.mapper.toStockPrice
-import dk.ksp.algotrading.repository.HoldingRepository
-import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
-import java.math.RoundingMode
+
 
 @Service
 class NotificationService(
-    private val holdingRepository: HoldingRepository,
     private val notificationClient: NotificationClient,
-    private val marketDataClient: MarketDataClient,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    fun sendNotification(message: String, title: String) {
+        notificationClient.sendNotification(message, title)
+    }
+
+
+
+//    private val logger = LoggerFactory.getLogger(javaClass)
 
 
 //    @Scheduled(cron = "0 0 22 * * MON-FRI", zone = "Europe/Copenhagen")
