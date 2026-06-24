@@ -4,5 +4,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class SaxoOrderSuccessResponseDTO(
     @JsonProperty("OrderId")
-    val orderId: Long
+    val orderId: String
 )

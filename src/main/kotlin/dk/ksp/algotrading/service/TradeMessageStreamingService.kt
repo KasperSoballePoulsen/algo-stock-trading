@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service
 @Service
 class TradeMessageStreamingService(
     private val saxoStreamingClient: SaxoStreamingClient,
-    private val notificationService: NotificationService
+    private val notificationService: NotificationService,
+    private val tradingService: TradingService
 ) {
 
     fun connect() {
@@ -26,14 +27,24 @@ class TradeMessageStreamingService(
     private fun handleMessages(messages: List<SaxoTradeMessageDTO>) {
         if (messages.isEmpty()) return
 
-        messages.forEach { notificationService.sendNotification(it.messageBody, it.messageHeader) }
+        messages.forEach { message ->
+            when (message.messageHeader) {
+                "Trade confirmation" -> {
+                    val sourceOrderId = message.sourceOrderId
+                        ?: throw IllegalStateException("Trade confirmation message missing SourceOrderId")
+
+                    tradingService.handleOrderFilled(sourceOrderId)
+                }
+            }
+
+            notificationService.sendNotification(
+                message.messageBody,
+                message.messageHeader
+            )
+        }
 
         val messageIds = messages.map { it.messageId }
-
         saxoStreamingClient.markMessagesAsSeen(messageIds)
-        // save to DB
-        // send websocket notification to frontend
-        // update order status
     }
 
     @PreDestroy

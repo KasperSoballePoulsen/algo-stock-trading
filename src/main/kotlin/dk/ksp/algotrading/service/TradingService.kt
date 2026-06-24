@@ -15,6 +15,7 @@ import dk.ksp.algotrading.exception.BrokerRejectedException
 import dk.ksp.algotrading.repository.OrderRepository
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TradingService(
@@ -58,7 +59,7 @@ class TradingService(
                 OrderDuration(durationType.saxoValue)
             )
 
-            val createdStatus = OrderStatus.CREATED
+            val createdStatus = OrderStatus.PLACED
 
             orderRepository.save(
                 Order(
@@ -73,7 +74,7 @@ class TradingService(
                 )
             )
 
-            OrderDTO(symbol, quantity, buySell, createdStatus)
+            OrderDTO(normalizedSymbol, quantity, buySell, createdStatus)
         } catch (ex: BrokerRejectedException) {
             orderRepository.save(
                 Order(
@@ -88,5 +89,17 @@ class TradingService(
             )
             throw ex
         }
+    }
+
+    @Transactional
+    fun handleOrderFilled(saxoOrderId: String) {
+        val order = orderRepository.findBySaxoOrderId(saxoOrderId)
+            ?: throw IllegalStateException("Could not find order with Saxo order id $saxoOrderId")
+
+        // Later:
+        // val details = saxoClient.getOrderDetails(saxoOrderId)
+        // order.executedPrice = details.executedPrice
+
+        order.status = OrderStatus.FILLED
     }
 }

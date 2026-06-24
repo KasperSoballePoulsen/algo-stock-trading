@@ -1,4 +1,4 @@
-package dk.ksp.algotrading.client
+package dk.ksp.algotrading.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

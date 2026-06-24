@@ -33,7 +33,7 @@ class Order(
     @Column(nullable = false)
     val quantity: Long,
 
-    val saxoOrderId: Long? = null,
+    val saxoOrderId: String? = null,
 
     val executedPrice: BigDecimal? = null,
 
