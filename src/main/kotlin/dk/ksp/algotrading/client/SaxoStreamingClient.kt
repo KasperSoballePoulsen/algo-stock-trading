@@ -18,10 +18,8 @@ import java.net.http.WebSocket
 class SaxoStreamingClient(
     @Value("\${saxo-sim-api.api-token}")
     private val saxoToken: String,
-
     @Value("\${saxo-sim-api.base-url}")
     private val baseUrl: String,
-
     private val objectMapper: ObjectMapper,
     private val client: HttpClient,
     private val messageParser: SaxoStreamMessageParser

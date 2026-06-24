@@ -1,6 +1,6 @@
 package dk.ksp.algotrading.client
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import dk.ksp.algotrading.dto.marketdata.response.QuoteDataDTO
 import dk.ksp.algotrading.exception.MarketDataException
@@ -17,10 +17,9 @@ class MarketDataClient(
     private val baseUrl: String,
     @Value("\${finnhub.api-key}")
     private val apiKey: String,
-    private val client: HttpClient
+    private val client: HttpClient,
+    private val objectMapper: ObjectMapper
 ) {
-
-    private val objectMapper = jacksonObjectMapper()
 
     fun fetchRealTimeQuoteData(symbol: String): QuoteDataDTO {
         try {

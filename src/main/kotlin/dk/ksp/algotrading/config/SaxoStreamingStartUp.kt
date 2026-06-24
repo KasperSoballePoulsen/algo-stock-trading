@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class SaxoStreamingStartup(
-    private val tradeMessageListener: TradeMessageStreamingService
+    private val tradeMessageStreamingService: TradeMessageStreamingService
 ) {
 
     @EventListener(ApplicationReadyEvent::class)
     fun start() {
-        tradeMessageListener.connect()
+        tradeMessageStreamingService.connect()
     }
 }

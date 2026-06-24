@@ -29,8 +29,6 @@ class SaxoClient(
     private val client: HttpClient
 ) {
 
-
-
     fun sendOrder(
         saxoAccountKey: String,
         amount: Long,
