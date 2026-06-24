@@ -2,7 +2,7 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.SaxoClient
 import dk.ksp.algotrading.dto.saxo.request.OrderDuration
-import dk.ksp.algotrading.dto.response.SubmittedOrderDTO
+import dk.ksp.algotrading.dto.response.OrderDTO
 import dk.ksp.algotrading.entity.Order
 import dk.ksp.algotrading.enum.AssetType
 import dk.ksp.algotrading.enum.BuySell
@@ -31,7 +31,7 @@ class TradingService(
         initiator: OrderInitiator,
         assetType: AssetType,
         durationType: DurationType
-    ): SubmittedOrderDTO {
+    ): OrderDTO {
 
         val tradingAccount = tradingAccountRepository.getTradingAccount()
 
@@ -58,7 +58,7 @@ class TradingService(
                 OrderDuration(durationType.saxoValue)
             )
 
-            val submittedStatus = OrderStatus.SUBMITTED
+            val createdStatus = OrderStatus.CREATED
 
             orderRepository.save(
                 Order(
@@ -67,13 +67,13 @@ class TradingService(
                     buySell = buySell,
                     quantity = quantity,
                     saxoOrderId = saxoOrder.orderId,
-                    status = submittedStatus,
+                    status = createdStatus,
                     orderType = orderType,
                     tradingAccount = tradingAccount,
                 )
             )
 
-            SubmittedOrderDTO(symbol, quantity, buySell, submittedStatus)
+            OrderDTO(symbol, quantity, buySell, createdStatus)
         } catch (ex: BrokerRejectedException) {
             orderRepository.save(
                 Order(

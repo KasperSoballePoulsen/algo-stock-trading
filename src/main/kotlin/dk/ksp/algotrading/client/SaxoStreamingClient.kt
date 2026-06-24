@@ -5,6 +5,7 @@ import dk.ksp.algotrading.dto.saxo.request.SaxoTradeMessageSubscriptionRequestDT
 import dk.ksp.algotrading.dto.saxo.response.SaxoTradeMessageDTO
 import dk.ksp.algotrading.streaming.SaxoStreamMessageParser
 import dk.ksp.algotrading.streaming.SaxoWebSocketListener
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.net.URI
@@ -26,14 +27,14 @@ class SaxoStreamingClient(
     private val messageParser: SaxoStreamMessageParser
 
 ) {
-
+    private val logger = LoggerFactory.getLogger(javaClass)
     private var webSocket: WebSocket? = null
 
 
-    fun createTradeMessageSubscription(contextId: String) {
+    fun createTradeMessageSubscription(contextId: String, referenceId: String) {
         val requestBody = SaxoTradeMessageSubscriptionRequestDTO(
             contextId = contextId,
-            referenceId = "trade-messages"
+            referenceId = referenceId
         )
 
         val request = HttpRequest.newBuilder()
@@ -64,7 +65,7 @@ class SaxoStreamingClient(
             .buildAsync(uri, SaxoWebSocketListener(messageParser, onConnected, onMessage))
             .thenAccept { webSocket = it }
             .exceptionally {
-                println("Could not connect to Saxo stream: ${it.message}")
+                logger.error("Could not connect to Saxo stream", it)
                 null
             }
     }
@@ -72,6 +73,26 @@ class SaxoStreamingClient(
     fun close() {
         webSocket?.sendClose(WebSocket.NORMAL_CLOSURE, "Closing")
         webSocket = null
+    }
+
+    fun markMessagesAsSeen(messageIds: List<String>) {
+        if (messageIds.isEmpty()) return
+
+        val joinedMessageIds = messageIds.joinToString(",")
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("$baseUrl/trade/v1/messages/seen?MessageIds=$joinedMessageIds"))
+            .header("Authorization", "Bearer $saxoToken")
+            .PUT(HttpRequest.BodyPublishers.noBody())
+            .build()
+
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+
+        if (response.statusCode() !in 200..299) {
+            throw IllegalStateException(
+                "Failed to mark Saxo trade messages as seen. Status=${response.statusCode()}, Body=${response.body()}"
+            )
+        }
     }
 
 }

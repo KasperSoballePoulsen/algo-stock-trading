@@ -2,7 +2,7 @@ package dk.ksp.algotrading.controller
 
 import dk.ksp.algotrading.dto.request.OrderRequestDTO
 import dk.ksp.algotrading.dto.response.PortfolioDTO
-import dk.ksp.algotrading.dto.response.SubmittedOrderDTO
+import dk.ksp.algotrading.dto.response.OrderDTO
 import dk.ksp.algotrading.service.TradingAccountService
 import dk.ksp.algotrading.service.TradingService
 import org.springframework.web.bind.annotation.GetMapping
@@ -21,7 +21,7 @@ class TradingAccountController(
     @PostMapping("/orders")
     fun createOrder(
         @RequestBody request: OrderRequestDTO
-    ): SubmittedOrderDTO {
+    ): OrderDTO {
         return tradingService.createOrder(
             request.symbol,
             request.quantity,

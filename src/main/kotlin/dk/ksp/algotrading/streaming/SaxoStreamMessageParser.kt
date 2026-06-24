@@ -2,6 +2,7 @@ package dk.ksp.algotrading.streaming
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.ksp.algotrading.dto.saxo.response.SaxoTradeMessageDTO
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.nio.ByteBuffer
 
@@ -11,17 +12,16 @@ class SaxoStreamMessageParser(
     private val objectMapper: ObjectMapper
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun parse(data: ByteBuffer): List<SaxoTradeMessageDTO> {
         val bytes = ByteArray(data.remaining())
         data.get(bytes)
 
-        val jsonStartIndex = bytes.indexOfFirst {
-            it == '['.code.toByte() || it == '{'.code.toByte()
-        }
+        val jsonStartIndex = bytes.indexOfFirst { it == '['.code.toByte() }
 
         if (jsonStartIndex == -1) {
-            println("Could not find JSON in binary message")
+            logger.warn("Could not find JSON in Saxo binary message")
             return emptyList()
         }
 
@@ -32,16 +32,10 @@ class SaxoStreamMessageParser(
             Charsets.UTF_8
         )
 
-        println("Saxo message: $json")
-
         val root = objectMapper.readTree(json)
 
-        if (!root.isArray) {
-            return emptyList()
-        }
-
         return root
-            .filter { it.has("AccountId") && it.has("MessageId") }
+            .filterNot { it.path("ReferenceId").asText() == "_heartbeat" }
             .map { objectMapper.treeToValue(it, SaxoTradeMessageDTO::class.java) }
     }
 }

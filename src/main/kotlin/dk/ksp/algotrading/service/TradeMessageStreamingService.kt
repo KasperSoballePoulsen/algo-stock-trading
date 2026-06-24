@@ -2,30 +2,42 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.SaxoStreamingClient
 import dk.ksp.algotrading.dto.saxo.response.SaxoTradeMessageDTO
+import jakarta.annotation.PreDestroy
 import org.springframework.stereotype.Service
 
 @Service
 class TradeMessageStreamingService(
-    private val saxoStreamingClient: SaxoStreamingClient
+    private val saxoStreamingClient: SaxoStreamingClient,
+    private val notificationService: NotificationService
 ) {
-    private val contextId = "algo-trading-app"
 
     fun connect() {
+        val contextId = "algo-trading-app"
+
         saxoStreamingClient.openWebsocket(
             contextId = contextId,
             onConnected = {
-                saxoStreamingClient.createTradeMessageSubscription(contextId)
+                saxoStreamingClient.createTradeMessageSubscription(contextId, "trade-messages")
             },
             onMessage = ::handleMessages
         )
     }
 
     private fun handleMessages(messages: List<SaxoTradeMessageDTO>) {
-        println("Sending out messages here")
+        if (messages.isEmpty()) return
 
-        //println(message)
+        messages.forEach { notificationService.sendNotification(it.messageBody, it.messageHeader) }
+
+        val messageIds = messages.map { it.messageId }
+
+        saxoStreamingClient.markMessagesAsSeen(messageIds)
         // save to DB
         // send websocket notification to frontend
         // update order status
+    }
+
+    @PreDestroy
+    fun shutdown() {
+        saxoStreamingClient.close()
     }
 }

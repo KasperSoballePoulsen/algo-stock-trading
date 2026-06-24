@@ -1,6 +1,7 @@
 package dk.ksp.algotrading.streaming
 
 import dk.ksp.algotrading.dto.saxo.response.SaxoTradeMessageDTO
+import org.slf4j.LoggerFactory
 import java.net.http.WebSocket
 import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
@@ -11,6 +12,7 @@ class SaxoWebSocketListener(
     private val onConnected: () -> Unit,
     private val onMessage: (List<SaxoTradeMessageDTO>) -> Unit
 ) : WebSocket.Listener {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun onOpen(webSocket: WebSocket) {
         webSocket.request(1)
@@ -32,6 +34,6 @@ class SaxoWebSocketListener(
     }
 
     override fun onError(webSocket: WebSocket, error: Throwable) {
-        println("Saxo WebSocket error: ${error.message}")
+        logger.error("Saxo WebSocket error: ${error.message}")
     }
 }
