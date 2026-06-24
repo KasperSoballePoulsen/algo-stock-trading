@@ -2,6 +2,7 @@ package dk.ksp.algotrading.client
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dk.ksp.algotrading.dto.saxo.request.SaxoTradeMessageSubscriptionRequestDTO
+import dk.ksp.algotrading.dto.saxo.response.SaxoTradeMessageDTO
 import dk.ksp.algotrading.streaming.SaxoStreamMessageParser
 import dk.ksp.algotrading.streaming.SaxoWebSocketListener
 import org.springframework.beans.factory.annotation.Value
@@ -22,11 +23,11 @@ class SaxoStreamingClient(
 
     private val objectMapper: ObjectMapper,
     private val client: HttpClient,
+    private val messageParser: SaxoStreamMessageParser
 
 ) {
-    private val messageParser = SaxoStreamMessageParser()
-    private var webSocket: WebSocket? = null
 
+    private var webSocket: WebSocket? = null
 
 
     fun createTradeMessageSubscription(contextId: String) {
@@ -54,36 +55,9 @@ class SaxoStreamingClient(
             )
         }
 
-        println(response.body())
     }
 
-//    fun openWebsocket(contextId: String) {
-//        client.newWebSocketBuilder()
-//            .buildAsync(
-//                URI.create("wss://sim-streaming.saxobank.com/sim/oapi/streaming/ws/connect?contextId=$contextId"),
-//                object : WebSocket.Listener {
-//
-//                    override fun onOpen(webSocket: WebSocket) {
-//                        println("Connected")
-//                        webSocket.request(1)
-//                    }
-//
-//                    override fun onText(
-//                        webSocket: WebSocket,
-//                        data: CharSequence,
-//                        last: Boolean
-//                    ): CompletionStage<*> {
-//
-//                        println("Received: $data")
-//
-//                        webSocket.request(1)
-//                        return CompletableFuture.completedFuture(null)
-//                    }
-//                }
-//            )
-//    }
-
-    fun openWebsocket(contextId: String, onConnected: () -> Unit, onMessage: (TradeMessageDTO) -> Unit) {
+    fun openWebsocket(contextId: String, onConnected: () -> Unit, onMessage: (List<SaxoTradeMessageDTO>) -> Unit) {
         val uri = URI.create("wss://sim-streaming.saxobank.com/sim/oapi/streaming/ws/connect?contextId=$contextId")
         client.newWebSocketBuilder()
             .header("Authorization", "Bearer $saxoToken")
@@ -99,56 +73,5 @@ class SaxoStreamingClient(
         webSocket?.sendClose(WebSocket.NORMAL_CLOSURE, "Closing")
         webSocket = null
     }
-//                object : WebSocket.Listener {
-//
-//                    override fun onOpen(webSocket: WebSocket) {
-//                        println("Connected")
-//                        webSocket.request(1)
-//                        onConnected()
-//                    }
-//
-//                    override fun onText(
-//                        webSocket: WebSocket,
-//                        data: CharSequence,
-//                        last: Boolean
-//                    ): CompletionStage<*> {
-//                        println("TEXT: $data")
-//                        webSocket.request(1)
-//                        return CompletableFuture.completedFuture(null)
-//                    }
-//
-//                    override fun onBinary(
-//                        webSocket: WebSocket,
-//                        data: ByteBuffer,
-//                        last: Boolean
-//                    ): CompletionStage<*> {
-//                        val bytes = ByteArray(data.remaining())
-//                        data.get(bytes)
-//
-//                        val jsonStartIndex = bytes.indexOfFirst {
-//                            it == '['.code.toByte() || it == '{'.code.toByte()
-//                        }
-//
-//                        if (jsonStartIndex != -1) {
-//                            val json = String(
-//                                bytes,
-//                                jsonStartIndex,
-//                                bytes.size - jsonStartIndex,
-//                                Charsets.UTF_8
-//                            )
-//
-//                            println("Saxo message: $json")
-//                        } else {
-//                            println("Could not find JSON in binary message")
-//                        }
-//
-//                        webSocket.request(1)
-//                        return CompletableFuture.completedFuture(null)
-//                    }
-//
-//                    override fun onError(webSocket: WebSocket, error: Throwable) {
-//                        println("WebSocket error: ${error.message}")
-//                    }
-
 
 }
