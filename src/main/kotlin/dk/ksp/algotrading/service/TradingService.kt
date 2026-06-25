@@ -55,8 +55,8 @@ class TradingService(
                 orderType,
                 isManualOrder,
                 uic,
-                assetType.saxoValue,
-                OrderDuration(durationType.saxoValue)
+                assetType,
+                OrderDuration(durationType)
             )
 
             val createdStatus = OrderStatus.PLACED

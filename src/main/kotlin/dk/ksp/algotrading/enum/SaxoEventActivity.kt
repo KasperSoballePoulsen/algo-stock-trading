@@ -2,9 +2,9 @@ package dk.ksp.algotrading.enum
 
 import com.fasterxml.jackson.annotation.JsonValue
 
-enum class OrderType(
+enum class SaxoEventActivity(
     @get:JsonValue
     val saxoValue: String
 ) {
-    MARKET("Market")
+    ORDERS("Orders"),
 }

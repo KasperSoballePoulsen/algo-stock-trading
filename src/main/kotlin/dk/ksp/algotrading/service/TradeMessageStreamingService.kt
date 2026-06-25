@@ -13,12 +13,11 @@ class TradeMessageStreamingService(
 ) {
 
     fun connect() {
-        val contextId = "algo-trading-app"
+
 
         saxoStreamingClient.openWebsocket(
-            contextId = contextId,
             onConnected = {
-                saxoStreamingClient.createTradeMessageSubscription(contextId, "trade-messages")
+                saxoStreamingClient.createTradeMessageSubscription("trade-messages")
             },
             onMessage = ::handleMessages
         )

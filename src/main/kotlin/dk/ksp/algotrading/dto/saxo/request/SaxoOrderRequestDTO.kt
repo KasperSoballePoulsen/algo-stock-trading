@@ -1,6 +1,10 @@
 package dk.ksp.algotrading.dto.saxo.request
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import dk.ksp.algotrading.enum.AssetType
+import dk.ksp.algotrading.enum.BuySell
+import dk.ksp.algotrading.enum.DurationType
+import dk.ksp.algotrading.enum.OrderType
 
 data class SaxoOrderRequestDTO(
     @JsonProperty("AccountKey")
@@ -10,10 +14,10 @@ data class SaxoOrderRequestDTO(
     val amount: Long,
 
     @JsonProperty("BuySell")
-    val buySell: String,
+    val buySell: BuySell,
 
     @JsonProperty("OrderType")
-    val orderType: String,
+    val orderType: OrderType,
 
     @JsonProperty("ManualOrder")
     val manualOrder: Boolean,
@@ -22,7 +26,7 @@ data class SaxoOrderRequestDTO(
     val uic: Long,
 
     @JsonProperty("AssetType")
-    val assetType: String,
+    val assetType: AssetType,
 
     @JsonProperty("OrderDuration")
     val orderDuration: OrderDuration
@@ -30,5 +34,5 @@ data class SaxoOrderRequestDTO(
 
 data class OrderDuration(
     @JsonProperty("DurationType")
-    val durationType: String
+    val durationType: DurationType
 )

@@ -16,6 +16,7 @@ import dk.ksp.algotrading.dto.saxo.response.SaxoAccountBalancesDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoNetPositionsResponse
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderErrorResponseDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderSuccessResponseDTO
+import dk.ksp.algotrading.enum.AssetType
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.exception.BrokerRejectedException
 
@@ -36,15 +37,15 @@ class SaxoClient(
         orderType: OrderType,
         manualOrder: Boolean,
         uic: Long,
-        assetType: String,
+        assetType: AssetType,
         orderDuration: OrderDuration
     ): SaxoOrderSuccessResponseDTO {
 
         val requestBody = SaxoOrderRequestDTO(
             saxoAccountKey,
             amount,
-            buySell.saxoValue,
-            orderType.saxoValue,
+            buySell,
+            orderType,
             manualOrder,
             uic,
             assetType,
@@ -139,8 +140,5 @@ class SaxoClient(
 
         return objectMapper.readValue<SaxoNetPositionsResponse>(response.body())
     }
-
-
-
 
 }
