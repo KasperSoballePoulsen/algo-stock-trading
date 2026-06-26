@@ -1,7 +1,6 @@
 package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.SaxoClient
-import dk.ksp.algotrading.dto.saxo.request.OrderDuration
 import dk.ksp.algotrading.dto.response.OrderDTO
 import dk.ksp.algotrading.entity.Order
 import dk.ksp.algotrading.enum.AssetType
@@ -14,8 +13,10 @@ import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.exception.BrokerRejectedException
 import dk.ksp.algotrading.repository.OrderRepository
 import dk.ksp.algotrading.repository.TradingAccountRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 
 @Service
 class TradingService(
@@ -23,6 +24,8 @@ class TradingService(
     private val orderRepository: OrderRepository,
     private val saxoClient: SaxoClient,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
 
     fun createOrder(
         symbol: String,
@@ -56,7 +59,7 @@ class TradingService(
                 isManualOrder,
                 uic,
                 assetType,
-                OrderDuration(durationType)
+                durationType
             )
 
             val createdStatus = OrderStatus.PLACED
@@ -92,14 +95,22 @@ class TradingService(
     }
 
     @Transactional
-    fun handleOrderFilled(saxoOrderId: String) {
+    fun updateOrder(
+        saxoOrderId: String,
+        orderStatus: OrderStatus,
+        executionPrice: BigDecimal? = null
+    ) {
         val order = orderRepository.findBySaxoOrderId(saxoOrderId)
-            ?: throw IllegalStateException("Could not find order with Saxo order id $saxoOrderId")
 
-        // Later:
-        // val details = saxoClient.getOrderDetails(saxoOrderId)
-        // order.executedPrice = details.executedPrice
+        if (order == null) {
+            logger.warn("Ignoring Saxo order update for unknown order id {}", saxoOrderId)
+            return
+        }
 
-        order.status = OrderStatus.FILLED
+        executionPrice?.let {
+            order.executedPrice = it
+        }
+
+        order.status = orderStatus
     }
 }

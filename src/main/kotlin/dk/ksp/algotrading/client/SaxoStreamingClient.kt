@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dk.ksp.algotrading.dto.saxo.request.SaxoClientEventsSubscriptionArgumentsDTO
 import dk.ksp.algotrading.dto.saxo.request.SaxoClientEventsSubscriptionDTO
 import dk.ksp.algotrading.dto.saxo.request.SaxoTradeMessageSubscriptionRequestDTO
+import dk.ksp.algotrading.dto.saxo.response.SaxoStreamEvent
 import dk.ksp.algotrading.dto.saxo.response.SaxoTradeMessageDTO
 import dk.ksp.algotrading.enum.SaxoEventActivity
 import dk.ksp.algotrading.streaming.SaxoStreamMessageParser
@@ -66,7 +67,7 @@ class SaxoStreamingClient(
         )
 
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("$baseUrl https://gateway.saxobank.com/sim/openapi/ens/v1/activities/subscriptions"))
+            .uri(URI.create("$baseUrl/ens/v1/activities/subscriptions"))
             .header("Authorization", "Bearer $saxoToken")
             .header("Content-Type", "application/json; charset=utf-8")
             .POST(
@@ -80,14 +81,14 @@ class SaxoStreamingClient(
 
         if (response.statusCode() !in 200..299) {
             throw IllegalStateException(
-                "Failed to create Saxo trade message subscription. Status=${response.statusCode()}, Body=${response.body()}"
+                "Failed to create Saxo client event subscription. Status=${response.statusCode()}, Body=${response.body()}"
             )
         }
 
 
     }
 
-    fun openWebsocket(onConnected: () -> Unit, onMessage: (List<SaxoTradeMessageDTO>) -> Unit) {
+    fun openWebsocket(onConnected: () -> Unit, onMessage: (List<SaxoStreamEvent>) -> Unit) {
         val uri = URI.create("wss://sim-streaming.saxobank.com/sim/oapi/streaming/ws/connect?contextId=$contextId")
         client.newWebSocketBuilder()
             .header("Authorization", "Bearer $saxoToken")

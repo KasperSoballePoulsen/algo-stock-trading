@@ -10,13 +10,14 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import com.fasterxml.jackson.module.kotlin.readValue
-import dk.ksp.algotrading.dto.saxo.request.OrderDuration
+import dk.ksp.algotrading.dto.saxo.request.SaxoOrderDurationDTO
 import dk.ksp.algotrading.dto.saxo.request.SaxoOrderRequestDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoAccountBalancesDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoNetPositionsResponse
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderErrorResponseDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderSuccessResponseDTO
 import dk.ksp.algotrading.enum.AssetType
+import dk.ksp.algotrading.enum.DurationType
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.exception.BrokerRejectedException
 
@@ -38,18 +39,18 @@ class SaxoClient(
         manualOrder: Boolean,
         uic: Long,
         assetType: AssetType,
-        orderDuration: OrderDuration
+        durationType: DurationType
     ): SaxoOrderSuccessResponseDTO {
 
         val requestBody = SaxoOrderRequestDTO(
             saxoAccountKey,
             amount,
-            buySell,
-            orderType,
+            buySell.saxoValue,
+            orderType.saxoValue,
             manualOrder,
             uic,
-            assetType,
-            orderDuration
+            assetType.saxoValue,
+            SaxoOrderDurationDTO(durationType.saxoValue)
         )
 
         val request = HttpRequest.newBuilder()
