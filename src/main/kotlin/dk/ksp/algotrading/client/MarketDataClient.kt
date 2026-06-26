@@ -17,7 +17,7 @@ class MarketDataClient(
     private val baseUrl: String,
     @Value("\${finnhub.api-key}")
     private val apiKey: String,
-    private val client: HttpClient,
+    private val httpClient: HttpClient,
     private val objectMapper: ObjectMapper
 ) {
 
@@ -30,7 +30,7 @@ class MarketDataClient(
                 .GET()
                 .build()
 
-            val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+            val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
             if (response.statusCode() != 200) {
                 throw RuntimeException(

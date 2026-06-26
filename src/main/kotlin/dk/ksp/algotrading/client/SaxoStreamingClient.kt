@@ -5,7 +5,6 @@ import dk.ksp.algotrading.dto.saxo.request.SaxoClientEventsSubscriptionArguments
 import dk.ksp.algotrading.dto.saxo.request.SaxoClientEventsSubscriptionDTO
 import dk.ksp.algotrading.dto.saxo.request.SaxoTradeMessageSubscriptionRequestDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoStreamEvent
-import dk.ksp.algotrading.dto.saxo.response.SaxoTradeMessageDTO
 import dk.ksp.algotrading.enum.SaxoEventActivity
 import dk.ksp.algotrading.streaming.SaxoStreamMessageParser
 import dk.ksp.algotrading.streaming.SaxoWebSocketListener
@@ -25,7 +24,7 @@ class SaxoStreamingClient(
     @Value("\${saxo-sim-api.base-url}")
     private val baseUrl: String,
     private val objectMapper: ObjectMapper,
-    private val client: HttpClient,
+    private val httpClient: HttpClient,
     private val messageParser: SaxoStreamMessageParser
 
 ) {
@@ -48,7 +47,7 @@ class SaxoStreamingClient(
             )
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
         if (response.statusCode() !in 200..299) {
             throw IllegalStateException(
@@ -77,7 +76,7 @@ class SaxoStreamingClient(
             )
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
         if (response.statusCode() !in 200..299) {
             throw IllegalStateException(
@@ -90,7 +89,7 @@ class SaxoStreamingClient(
 
     fun openWebsocket(onConnected: () -> Unit, onMessage: (List<SaxoStreamEvent>) -> Unit) {
         val uri = URI.create("wss://sim-streaming.saxobank.com/sim/oapi/streaming/ws/connect?contextId=$contextId")
-        client.newWebSocketBuilder()
+        httpClient.newWebSocketBuilder()
             .header("Authorization", "Bearer $saxoToken")
             .buildAsync(uri, SaxoWebSocketListener(messageParser, onConnected, onMessage))
             .thenAccept { webSocket = it }
@@ -116,7 +115,7 @@ class SaxoStreamingClient(
             .PUT(HttpRequest.BodyPublishers.noBody())
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
         if (response.statusCode() !in 200..299) {
             throw IllegalStateException(

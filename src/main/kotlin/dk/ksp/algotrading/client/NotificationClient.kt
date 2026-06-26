@@ -13,7 +13,7 @@ class NotificationClient(
     private val topicName: String,
     @Value("\${ntfy.base-url}")
     private val baseUrl: String,
-    private val client: HttpClient
+    private val httpClient: HttpClient
 ) {
 
     fun sendNotification(message: String, title: String) {
@@ -24,6 +24,6 @@ class NotificationClient(
             .POST(HttpRequest.BodyPublishers.ofString(message))
             .build()
 
-        client.send(request, HttpResponse.BodyHandlers.ofString())
+        httpClient.send(request, HttpResponse.BodyHandlers.ofString())
     }
 }

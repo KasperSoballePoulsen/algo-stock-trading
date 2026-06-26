@@ -28,7 +28,7 @@ class SaxoClient(
     @Value("\${saxo-sim-api.base-url}")
     private val baseUrl: String,
     private val objectMapper: ObjectMapper,
-    private val client: HttpClient
+    private val httpClient: HttpClient
 ) {
 
     fun sendOrder(
@@ -64,7 +64,7 @@ class SaxoClient(
             )
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
         val body = response.body()
 
         if (response.statusCode() !in 200..299) {
@@ -90,7 +90,7 @@ class SaxoClient(
             .GET()
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
         if (response.statusCode() != 200) {
             throw IllegalStateException(
@@ -109,7 +109,7 @@ class SaxoClient(
             .GET()
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
         if (response.statusCode() != 200) {
             throw IllegalStateException(
@@ -131,7 +131,7 @@ class SaxoClient(
             .GET()
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
         if (response.statusCode() != 200) {
             throw IllegalStateException(
