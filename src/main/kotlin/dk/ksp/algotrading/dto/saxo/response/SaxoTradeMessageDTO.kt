@@ -35,4 +35,4 @@ data class SaxoTradeMessageDTO(
 
     @JsonProperty("SourceOrderId")
     val sourceOrderId: String? = null
-)
+) : SaxoStreamEvent

@@ -1,8 +1,8 @@
 package dk.ksp.algotrading.enum
 
 
-enum class DurationType(
+enum class SaxoEventActivity(
     val saxoValue: String
 ) {
-    DAY_ORDER("DayOrder")
+    ORDERS("Orders"),
 }

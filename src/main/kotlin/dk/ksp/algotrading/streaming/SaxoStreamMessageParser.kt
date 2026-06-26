@@ -1,6 +1,8 @@
 package dk.ksp.algotrading.streaming
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import dk.ksp.algotrading.dto.saxo.response.SaxoOrderEventDTO
+import dk.ksp.algotrading.dto.saxo.response.SaxoStreamEvent
 import dk.ksp.algotrading.dto.saxo.response.SaxoTradeMessageDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -14,11 +16,13 @@ class SaxoStreamMessageParser(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun parse(data: ByteBuffer): List<SaxoTradeMessageDTO> {
+    fun parse(data: ByteBuffer): List<SaxoStreamEvent> {
         val bytes = ByteArray(data.remaining())
         data.get(bytes)
 
-        val jsonStartIndex = bytes.indexOfFirst { it == '['.code.toByte() }
+        val jsonStartIndex = bytes.indexOfFirst {
+            it == '['.code.toByte()
+        }
 
         if (jsonStartIndex == -1) {
             logger.warn("Could not find JSON in Saxo binary message")
@@ -35,7 +39,27 @@ class SaxoStreamMessageParser(
         val root = objectMapper.readTree(json)
 
         return root
-            .filterNot { it.path("ReferenceId").asText() == "_heartbeat" }
-            .map { objectMapper.treeToValue(it, SaxoTradeMessageDTO::class.java) }
+            .filterNot { node ->
+                node.path("ReferenceId").asText() == "_heartbeat"
+            }
+            .mapNotNull { node ->
+                when {
+                    node.has("MessageHeader") && node.has("MessageBody") -> {
+                        logger.info("Saxo trade message: {}", json)
+                        objectMapper.treeToValue(node, SaxoTradeMessageDTO::class.java
+                        )
+                    }
+
+                    node.path("ActivityType").asText() == "Orders" -> {
+                        logger.info("Saxo order event: {}", json)
+                        objectMapper.treeToValue(node, SaxoOrderEventDTO::class.java)
+                    }
+
+                    else -> {
+                        logger.warn("Unknown Saxo stream event: {}", node)
+                        null
+                    }
+                }
+            }
     }
 }

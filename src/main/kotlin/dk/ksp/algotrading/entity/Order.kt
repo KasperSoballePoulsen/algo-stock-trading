@@ -35,7 +35,7 @@ class Order(
 
     val saxoOrderId: String? = null,
 
-    val executedPrice: BigDecimal? = null,
+    var executedPrice: BigDecimal? = null,
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

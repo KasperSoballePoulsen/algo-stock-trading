@@ -25,10 +25,10 @@ data class SaxoOrderRequestDTO(
     val assetType: String,
 
     @JsonProperty("OrderDuration")
-    val orderDuration: OrderDuration
+    val orderDuration: SaxoOrderDurationDTO
 )
 
-data class OrderDuration(
+data class SaxoOrderDurationDTO(
     @JsonProperty("DurationType")
     val durationType: String
 )
