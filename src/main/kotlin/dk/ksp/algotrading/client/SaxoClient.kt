@@ -142,4 +142,27 @@ class SaxoClient(
         return objectMapper.readValue<SaxoNetPositionsResponse>(response.body())
     }
 
+
+//    fun getOrderHistory(
+//        saxoClientKey: String,
+//        saxoAccountKey: String
+//    ): SaxoNetPositionsResponse {
+//
+//        val request = HttpRequest.newBuilder()
+//            .uri(URI.create("$baseUrl/port/v1/netpositions?AccountKey=$saxoAccountKey&ClientKey=$saxoClientKey"))
+//            .header("Authorization", "Bearer $saxoToken")
+//            .GET()
+//            .build()
+//
+//        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+//
+//        if (response.statusCode() != 200) {
+//            throw IllegalStateException(
+//                "Failed to fetch Saxo net positions. Status=${response.statusCode()}, Body=${response.body()}"
+//            )
+//        }
+//
+//        return objectMapper.readValue<SaxoNetPositionsResponse>(response.body())
+//    }
+
 }
