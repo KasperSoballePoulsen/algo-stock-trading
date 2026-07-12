@@ -14,12 +14,16 @@ import dk.ksp.algotrading.dto.saxo.request.SaxoOrderDurationDTO
 import dk.ksp.algotrading.dto.saxo.request.SaxoOrderRequestDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoAccountBalancesDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoNetPositionsResponse
+import dk.ksp.algotrading.dto.saxo.response.SaxoOrderActivitiesResponseDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderErrorResponseDTO
+import dk.ksp.algotrading.dto.saxo.response.SaxoOrderEventDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderSuccessResponseDTO
 import dk.ksp.algotrading.enum.AssetType
 import dk.ksp.algotrading.enum.DurationType
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.exception.BrokerRejectedException
+import org.springframework.scheduling.annotation.Scheduled
+import java.time.Duration
 
 @Component
 class SaxoClient(
@@ -143,26 +147,27 @@ class SaxoClient(
     }
 
 
-//    fun getOrderHistory(
-//        saxoClientKey: String,
-//        saxoAccountKey: String
-//    ): SaxoNetPositionsResponse {
-//
-//        val request = HttpRequest.newBuilder()
-//            .uri(URI.create("$baseUrl/port/v1/netpositions?AccountKey=$saxoAccountKey&ClientKey=$saxoClientKey"))
-//            .header("Authorization", "Bearer $saxoToken")
-//            .GET()
-//            .build()
-//
-//        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-//
-//        if (response.statusCode() != 200) {
-//            throw IllegalStateException(
-//                "Failed to fetch Saxo net positions. Status=${response.statusCode()}, Body=${response.body()}"
-//            )
-//        }
-//
-//        return objectMapper.readValue<SaxoNetPositionsResponse>(response.body())
-//    }
+
+    fun getOrderHistory(
+        saxoClientKey: String,
+        saxoAccountKey: String
+    ): List<SaxoOrderEventDTO> {
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("$baseUrl/cs/v1/audit/orderactivities?\$top=200&EntryType=Last&ClientKey=$saxoClientKey&AccountKey=$saxoAccountKey"))
+            .header("Authorization", "Bearer $saxoToken")
+            .GET()
+            .build()
+
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+
+        if (response.statusCode() != 200) {
+            throw IllegalStateException(
+                "Failed to fetch Saxo order history. Status=${response.statusCode()}, Body=${response.body()}"
+            )
+        }
+
+        return objectMapper.readValue<SaxoOrderActivitiesResponseDTO>(response.body()).data
+    }
 
 }

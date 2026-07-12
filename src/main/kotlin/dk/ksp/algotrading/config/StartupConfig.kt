@@ -26,6 +26,7 @@ class StartupConfig(
                     "Kasper Søballe Poulsen",
                     saxoClient.clientKey,
                     saxoClient.defaultAccountKey,
+                    saxoClient.defaultAccountId
                 )
             )
         }
