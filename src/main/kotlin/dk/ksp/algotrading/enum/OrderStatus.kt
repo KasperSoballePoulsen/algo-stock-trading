@@ -4,6 +4,7 @@ enum class OrderStatus(
     val saxoValue: String
 ) {
     PLACED("Placed"),
+    CHANGED("Changed"),
     FILLED("FinalFill"),
     REJECTED("Rejected");
 

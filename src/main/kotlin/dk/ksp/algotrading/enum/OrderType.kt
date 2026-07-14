@@ -4,7 +4,8 @@ package dk.ksp.algotrading.enum
 enum class OrderType(
     val saxoValue: String
 ) {
-    MARKET("Market");
+    MARKET("Market"),
+    LIMIT("Limit");
 
     companion object {
         fun fromSaxoValue(value: String): OrderType =

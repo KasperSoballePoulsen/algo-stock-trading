@@ -31,7 +31,7 @@ class Order(
     val buySell: BuySell,
 
     @Column(nullable = false)
-    val quantity: Long,
+    var quantity: Long,
 
     val saxoOrderId: String? = null,
 

@@ -149,12 +149,11 @@ class SaxoClient(
 
 
     fun getOrderHistory(
-        saxoClientKey: String,
-        saxoAccountKey: String
-    ): List<SaxoOrderEventDTO> {
+        orderHistoryNextPollUrl: String
+    ): SaxoOrderActivitiesResponseDTO {
 
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("$baseUrl/cs/v1/audit/orderactivities?\$top=200&EntryType=Last&ClientKey=$saxoClientKey&AccountKey=$saxoAccountKey"))
+            .uri(URI.create(orderHistoryNextPollUrl))
             .header("Authorization", "Bearer $saxoToken")
             .GET()
             .build()
@@ -167,7 +166,7 @@ class SaxoClient(
             )
         }
 
-        return objectMapper.readValue<SaxoOrderActivitiesResponseDTO>(response.body()).data
+        return objectMapper.readValue<SaxoOrderActivitiesResponseDTO>(response.body())
     }
 
 }

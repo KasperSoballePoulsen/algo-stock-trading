@@ -5,6 +5,7 @@ import dk.ksp.algotrading.dto.saxo.response.SaxoOrderEventDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoStreamEvent
 import dk.ksp.algotrading.dto.saxo.response.SaxoTradeMessageDTO
 import dk.ksp.algotrading.enum.OrderStatus
+import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.enum.SaxoEventActivity
 import jakarta.annotation.PreDestroy
 import org.springframework.stereotype.Service
@@ -46,6 +47,8 @@ class StreamingService(
         tradingService.updateOrder(
             orderEvent.orderId,
             OrderStatus.fromSaxoValue(orderEvent.status),
+            OrderType.fromSaxoValue(orderEvent.orderType),
+            orderEvent.amount.toLong(),
             orderEvent.executionPrice
         )
     }

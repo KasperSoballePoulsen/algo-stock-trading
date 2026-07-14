@@ -28,6 +28,9 @@ class TradingAccount protected constructor(
     @JoinColumn(name = "trader_id", nullable = false, unique = true)
     val trader: Trader,
 
+    @Column(nullable = false)
+    var orderHistoryNextPollUrl: String,
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -44,11 +47,13 @@ class TradingAccount protected constructor(
             username: String,
             saxoClientKey: String,
             saxoAccountKey: String,
-            saxoAccountId: String
+            saxoAccountId: String,
+            orderHistoryNextPollUrl: String
+
         ): TradingAccount {
             val trader = Trader.createForAccount(username, saxoClientKey)
 
-            return TradingAccount(saxoAccountKey, saxoAccountId, trader)
+            return TradingAccount(saxoAccountKey, saxoAccountId, trader, orderHistoryNextPollUrl)
         }
     }
 }

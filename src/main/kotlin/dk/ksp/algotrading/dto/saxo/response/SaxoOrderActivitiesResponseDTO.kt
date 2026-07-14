@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SaxoOrderActivitiesResponseDTO(
+    @JsonProperty("__nextPoll")
+    val nextPoll: String,
     @JsonProperty("Data")
     val data: List<SaxoOrderEventDTO>
 )

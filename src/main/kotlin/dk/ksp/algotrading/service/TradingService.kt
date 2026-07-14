@@ -100,6 +100,8 @@ class TradingService(
     fun updateOrder(
         saxoOrderId: String,
         orderStatus: OrderStatus,
+        orderType: OrderType,
+        quantity: Long,
         executionPrice: BigDecimal?
     ) {
         val order = orderRepository.findBySaxoOrderId(saxoOrderId)
@@ -114,10 +116,11 @@ class TradingService(
         }
 
         order.status = orderStatus
+        order.orderType = orderType
+        order.quantity = quantity
     }
 
 
-    @Transactional
     fun reconcileOrderHistory(orderHistory: List<SaxoOrderEventDTO>) {
         orderHistory.forEach { orderEvent ->
             if (orderEvent.subStatus != "Confirmed") {
@@ -128,6 +131,8 @@ class TradingService(
 
             if (existingOrder != null) {
                 existingOrder.status = OrderStatus.fromSaxoValue(orderEvent.status)
+                existingOrder.orderType = OrderType.fromSaxoValue(orderEvent.orderType)
+                existingOrder.quantity = orderEvent.amount.toLong()
 
                 orderEvent.executionPrice?.let {
                     existingOrder.executedPrice = it
