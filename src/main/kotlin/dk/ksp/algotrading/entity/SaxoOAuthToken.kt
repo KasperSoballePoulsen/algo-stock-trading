@@ -13,10 +13,10 @@ class SaxoOAuthToken(
     @Id
     val id: Long = 1L,
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     var accessToken: String,
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     var refreshToken: String,
 
     @Column(nullable = false)
