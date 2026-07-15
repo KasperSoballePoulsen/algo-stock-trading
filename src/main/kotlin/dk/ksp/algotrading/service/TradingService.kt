@@ -2,6 +2,7 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.client.SaxoClient
 import dk.ksp.algotrading.dto.response.OrderDTO
+import dk.ksp.algotrading.dto.saxo.response.SaxoOrderEventDTO
 import dk.ksp.algotrading.entity.Order
 import dk.ksp.algotrading.enum.AssetType
 import dk.ksp.algotrading.enum.BuySell
@@ -14,6 +15,7 @@ import dk.ksp.algotrading.exception.BrokerRejectedException
 import dk.ksp.algotrading.repository.OrderRepository
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -98,7 +100,9 @@ class TradingService(
     fun updateOrder(
         saxoOrderId: String,
         orderStatus: OrderStatus,
-        executionPrice: BigDecimal? = null
+        orderType: OrderType,
+        quantity: Long,
+        executionPrice: BigDecimal?
     ) {
         val order = orderRepository.findBySaxoOrderId(saxoOrderId)
 
@@ -112,5 +116,47 @@ class TradingService(
         }
 
         order.status = orderStatus
+        order.orderType = orderType
+        order.quantity = quantity
+    }
+
+
+    fun reconcileOrderHistory(orderHistory: List<SaxoOrderEventDTO>) {
+        orderHistory.forEach { orderEvent ->
+            if (orderEvent.subStatus != "Confirmed") {
+                return@forEach
+            }
+
+            val existingOrder = orderRepository.findBySaxoOrderId(orderEvent.orderId)
+
+            if (existingOrder != null) {
+                existingOrder.status = OrderStatus.fromSaxoValue(orderEvent.status)
+                existingOrder.orderType = OrderType.fromSaxoValue(orderEvent.orderType)
+                existingOrder.quantity = orderEvent.amount.toLong()
+
+                orderEvent.executionPrice?.let {
+                    existingOrder.executedPrice = it
+                }
+            } else {
+                val account = tradingAccountRepository.findBySaxoAccountId(orderEvent.accountId)
+                    ?: throw IllegalStateException(
+                        "No trading account found for Saxo accountId=${orderEvent.accountId}"
+                    )
+
+                orderRepository.save(
+                    Order(
+                        Instrument.fromUIC(orderEvent.uic),
+                        orderEvent.uic,
+                        BuySell.fromSaxoValue(orderEvent.buySell),
+                        orderEvent.amount.toLong(),
+                        orderEvent.orderId,
+                        orderEvent.executionPrice,
+                        OrderStatus.fromSaxoValue(orderEvent.status),
+                        OrderType.fromSaxoValue(orderEvent.orderType),
+                        account
+                    )
+                )
+            }
+        }
     }
 }

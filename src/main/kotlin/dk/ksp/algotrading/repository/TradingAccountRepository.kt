@@ -16,4 +16,6 @@ interface TradingAccountRepository : JpaRepository<TradingAccount, Long> {
     )
     fun getTradingAccount(): TradingAccount
 
+    fun findBySaxoAccountId(saxoAccountId: String): TradingAccount?
+
 }

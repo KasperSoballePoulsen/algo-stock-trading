@@ -2,6 +2,7 @@ package dk.ksp.algotrading.dto.saxo.response
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import dk.ksp.algotrading.enum.BuySell
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -11,14 +12,8 @@ data class SaxoOrderEventDTO(
     @JsonProperty("AccountId")
     val accountId: String,
 
-    @JsonProperty("AccountKey")
-    val accountKey: String,
-
     @JsonProperty("ActivityTime")
     val activityTime: Instant,
-
-    @JsonProperty("ActivityType")
-    val activityType: String,
 
     @JsonProperty("Amount")
     val amount: Double,
@@ -32,9 +27,6 @@ data class SaxoOrderEventDTO(
     @JsonProperty("ClientId")
     val clientId: String,
 
-    @JsonProperty("ClientKey")
-    val clientKey: String,
-
     @JsonProperty("CorrelationKey")
     val correlationKey: String,
 
@@ -43,9 +35,6 @@ data class SaxoOrderEventDTO(
 
     @JsonProperty("HandledBy")
     val handledBy: String,
-
-    @JsonProperty("IsSecondCurrencyOrder")
-    val isSecondCurrencyOrder: Boolean,
 
     @JsonProperty("OrderId")
     val orderId: String,
@@ -56,17 +45,11 @@ data class SaxoOrderEventDTO(
     @JsonProperty("OrderType")
     val orderType: String,
 
-    @JsonProperty("SequenceId")
-    val sequenceId: String,
-
     @JsonProperty("Status")
     val status: String,
 
     @JsonProperty("SubStatus")
     val subStatus: String,
-
-    @JsonProperty("Symbol")
-    val symbol: String,
 
     @JsonProperty("Uic")
     val uic: Long,

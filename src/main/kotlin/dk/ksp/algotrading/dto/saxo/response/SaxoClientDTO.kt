@@ -7,4 +7,7 @@ data class SaxoClientDTO(
     val clientKey: String,
     @JsonProperty("DefaultAccountKey")
     val defaultAccountKey: String,
+
+    @JsonProperty("DefaultAccountId")
+    val defaultAccountId: String
 )
