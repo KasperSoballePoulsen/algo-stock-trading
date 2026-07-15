@@ -37,11 +37,11 @@ class StartupConfig(
                         "&EntryType=Last" +
                         "&ClientKey=${saxoClientDetails.clientKey}" +
                         "&AccountKey=${saxoClientDetails.defaultAccountKey}" +
-                        "&FromDateTime=${Instant.now()}"
+                        "&FromDateTime=${Instant.now()}" // later FromDateTime should be now - 24h
 
             tradingAccountRepository.save(
                 TradingAccount.createWithTrader(
-                    "Kasper Søballe Poulsen",
+                    "Kasper",
                     saxoClientDetails.clientKey,
                     saxoClientDetails.defaultAccountKey,
                     saxoClientDetails.defaultAccountId,
