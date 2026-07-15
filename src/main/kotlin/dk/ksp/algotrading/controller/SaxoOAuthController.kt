@@ -25,9 +25,7 @@ class SaxoOAuthController(
 
         session.setAttribute(OAUTH_STATE, state)
 
-        response.sendRedirect(
-            saxoOAuthService.createAuthorizationUrl(state)
-        )
+        response.sendRedirect(saxoOAuthService.createAuthorizationUrl(state))
     }
 
     @GetMapping("/callback")
@@ -36,8 +34,7 @@ class SaxoOAuthController(
         @RequestParam state: String,
         session: HttpSession
     ): ResponseEntity<String> {
-        val expectedState =
-            session.getAttribute(OAUTH_STATE) as? String
+        val expectedState = session.getAttribute(OAUTH_STATE) as? String //this is ugly
 
         if (expectedState == null || expectedState != state) {
             return ResponseEntity
@@ -49,10 +46,7 @@ class SaxoOAuthController(
 
         saxoOAuthService.handleCallback(code)
 
-        return ResponseEntity.ok(
-            "Saxo authorization completed. " +
-                    "You can now restart the application."
-        )
+        return ResponseEntity.ok("Saxo authorization completed. You can now restart the application.")
     }
 
     companion object {

@@ -31,6 +31,7 @@ class SaxoClient(
     private val objectMapper: ObjectMapper,
     private val httpClient: HttpClient
 ) {
+    private val authorizationHeader: String get() = "Bearer ${saxoTokenService.getValidAccessToken()}"
 
     fun sendOrder(
         saxoAccountKey: String,
@@ -56,10 +57,7 @@ class SaxoClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/trade/v2/orders"))
-            .header(
-                "Authorization",
-                "Bearer ${saxoTokenService.getValidAccessToken()}"
-            )
+            .header("Authorization", authorizationHeader)
             .header("Content-Type", "application/json")
             .POST(
                 HttpRequest.BodyPublishers.ofString(
@@ -90,10 +88,7 @@ class SaxoClient(
     fun getSaxoClient(): SaxoClientDTO {
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/port/v1/clients/me"))
-            .header(
-                "Authorization",
-                "Bearer ${saxoTokenService.getValidAccessToken()}"
-            )
+            .header("Authorization", authorizationHeader)
             .GET()
             .build()
 
@@ -112,10 +107,7 @@ class SaxoClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/port/v1/balances?AccountKey=${saxoAccountKey}&ClientKey=${saxoClientKey}"))
-            .header(
-                "Authorization",
-                "Bearer ${saxoTokenService.getValidAccessToken()}"
-            )
+            .header("Authorization", authorizationHeader)
             .GET()
             .build()
 
@@ -137,10 +129,7 @@ class SaxoClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/port/v1/netpositions?AccountKey=$saxoAccountKey&ClientKey=$saxoClientKey"))
-            .header(
-                "Authorization",
-                "Bearer ${saxoTokenService.getValidAccessToken()}"
-            )
+            .header("Authorization", authorizationHeader)
             .GET()
             .build()
 
@@ -163,10 +152,7 @@ class SaxoClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create(orderHistoryNextPollUrl))
-            .header(
-                "Authorization",
-                "Bearer ${saxoTokenService.getValidAccessToken()}"
-            )
+            .header("Authorization", authorizationHeader)
             .GET()
             .build()
 

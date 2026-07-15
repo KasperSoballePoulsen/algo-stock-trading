@@ -30,11 +30,7 @@ class StartupConfig(
     @Bean
     fun initTrader() = CommandLineRunner {
         if (!saxoTokenService.hasToken()) {
-            logger.warn(
-                "Saxo has not been authorized. " +
-                        "Open /api/saxo/oauth/login"
-            )
-
+            logger.warn("Saxo has not been authorized. Open /api/saxo/oauth/login")
             return@CommandLineRunner
         }
 

@@ -18,14 +18,11 @@ class SaxoTokenService(
 ) {
     private val refreshLock = Any()
 
-    fun hasToken(): Boolean =
-        tokenRepository.existsById(TOKEN_ID)
+    fun hasToken() = tokenRepository.existsById(TOKEN_ID)
 
     @Transactional
-    fun saveInitialTokens(
-        response: SaxoTokenResponseDTO
-    ) {
-        saveTokens(response)
+    fun saveInitialTokens(response: SaxoTokenResponseDTO) {
+        tokenRepository.save(createToken(response))
     }
 
     fun getValidAccessToken(): String {
@@ -35,13 +32,11 @@ class SaxoTokenService(
             val token = tokenRepository.findById(TOKEN_ID)
                 .orElseThrow {
                     IllegalStateException(
-                        "Saxo has not been authorized. " +
-                                "Open /api/saxo/oauth/login first."
+                        "Saxo has not been authorized. Open /api/saxo/oauth/login first."
                     )
                 }
 
-            val refreshThreshold =
-                Instant.now().plusSeconds(REFRESH_MARGIN_SECONDS)
+            val refreshThreshold = Instant.now().plusSeconds(REFRESH_MARGIN_SECONDS)
 
             if (token.accessTokenExpiresAt.isAfter(refreshThreshold)) {
                 return@synchronized token.accessToken
@@ -49,14 +44,11 @@ class SaxoTokenService(
 
             if (token.refreshTokenExpiresAt.isBefore(Instant.now())) {
                 throw IllegalStateException(
-                    "Saxo refresh token has expired. " +
-                            "Authorization is required again."
+                    "Saxo refresh token has expired. Authorization is required again."
                 )
             }
 
-            val response = saxoOAuthClient.refreshTokens(
-                token.refreshToken
-            )
+            val response = saxoOAuthClient.refreshTokens(token.refreshToken)
 
             val updatedToken = createToken(response)
 
@@ -68,23 +60,14 @@ class SaxoTokenService(
         }
 
         refreshedAccessToken?.let {
-            eventPublisher.publishEvent(
-                SaxoAccessTokenRefreshedEvent(it)
-            )
+            eventPublisher.publishEvent(SaxoAccessTokenRefreshedEvent(it))
         }
 
         return accessToken
     }
 
-    private fun saveTokens(
-        response: SaxoTokenResponseDTO
-    ) {
-        tokenRepository.save(createToken(response))
-    }
 
-    private fun createToken(
-        response: SaxoTokenResponseDTO
-    ): SaxoOAuthToken {
+    private fun createToken(response: SaxoTokenResponseDTO): SaxoOAuthToken {
         val now = Instant.now()
 
         return SaxoOAuthToken(
@@ -92,10 +75,8 @@ class SaxoTokenService(
             accessToken = response.accessToken,
             refreshToken = response.refreshToken,
             tokenType = response.tokenType,
-            accessTokenExpiresAt =
-                now.plusSeconds(response.expiresIn),
-            refreshTokenExpiresAt =
-                now.plusSeconds(response.refreshTokenExpiresIn)
+            accessTokenExpiresAt = now.plusSeconds(response.expiresIn),
+            refreshTokenExpiresAt = now.plusSeconds(response.refreshTokenExpiresIn)
         )
     }
 

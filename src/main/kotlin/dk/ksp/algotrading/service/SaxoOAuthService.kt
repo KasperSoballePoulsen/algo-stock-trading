@@ -33,9 +33,7 @@ class SaxoOAuthService(
     }
 
     fun handleCallback(authorizationCode: String) {
-        val tokens = saxoOAuthClient.exchangeAuthorizationCode(
-            authorizationCode
-        )
+        val tokens = saxoOAuthClient.exchangeAuthorizationCode(authorizationCode)
 
         saxoTokenService.saveInitialTokens(tokens)
     }

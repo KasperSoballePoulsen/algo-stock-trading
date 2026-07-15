@@ -132,23 +132,13 @@ class StreamingService(
     }
 
     @EventListener
-    fun onAccessTokenRefreshed(
-        event: SaxoAccessTokenRefreshedEvent
-    ) {
-        if (!connected.get() || shuttingDown.get()) {
-            return
-        }
+    fun onAccessTokenRefreshed(event: SaxoAccessTokenRefreshedEvent) {
+        if (!connected.get() || shuttingDown.get()) return
 
         try {
-            saxoStreamingClient.authorizeStreamingContext(
-                event.accessToken
-            )
+            saxoStreamingClient.authorizeStreamingContext(event.accessToken)
         } catch (error: Exception) {
-            logger.error(
-                "Could not re-authorize Saxo stream",
-                error
-            )
-
+            logger.error("Could not re-authorize Saxo stream", error)
             saxoStreamingClient.close()
         }
     }

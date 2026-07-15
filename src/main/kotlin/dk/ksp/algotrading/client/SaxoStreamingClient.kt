@@ -34,7 +34,7 @@ class SaxoStreamingClient(
     private val logger = LoggerFactory.getLogger(javaClass)
     private var webSocket: WebSocket? = null
     val contextId = "algo-trading-app"
-    private fun authorizationHeader(): String = "Bearer ${saxoTokenService.getValidAccessToken()}"
+    private val authorizationHeader: String get() = "Bearer ${saxoTokenService.getValidAccessToken()}"
 
 
     fun createTradeMessageSubscription(referenceId: String) {
@@ -42,7 +42,7 @@ class SaxoStreamingClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/trade/v1/messages/subscriptions"))
-            .header("Authorization", authorizationHeader())
+            .header("Authorization", authorizationHeader)
             .header("Content-Type", "application/json; charset=utf-8")
             .POST(
                 HttpRequest.BodyPublishers.ofString(
@@ -71,7 +71,7 @@ class SaxoStreamingClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/ens/v1/activities/subscriptions"))
-            .header("Authorization", authorizationHeader())
+            .header("Authorization", authorizationHeader)
             .header("Content-Type", "application/json; charset=utf-8")
             .POST(
                 HttpRequest.BodyPublishers.ofString(
@@ -94,7 +94,7 @@ class SaxoStreamingClient(
     fun openWebsocket(onConnected: () -> Unit, onDisconnected: (Throwable?) -> Unit, onMessage: (List<SaxoStreamEvent>) -> Unit) {
         val uri = URI.create("wss://sim-streaming.saxobank.com/sim/oapi/streaming/ws/connect?contextId=$contextId")
         httpClient.newWebSocketBuilder()
-            .header("Authorization", authorizationHeader())
+            .header("Authorization", authorizationHeader)
             .buildAsync(uri, SaxoWebSocketListener(messageParser, onConnected, onDisconnected, onMessage))
             .thenAccept { webSocket = it }
             .exceptionally { error ->
@@ -116,7 +116,7 @@ class SaxoStreamingClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/trade/v1/messages/seen?MessageIds=$joinedMessageIds"))
-            .header("Authorization", authorizationHeader())
+            .header("Authorization", authorizationHeader)
             .PUT(HttpRequest.BodyPublishers.noBody())
             .build()
 
@@ -132,29 +132,16 @@ class SaxoStreamingClient(
 
     fun authorizeStreamingContext(accessToken: String) {
         val request = HttpRequest.newBuilder()
-            .uri(
-                URI.create(
-                    "$streamingUrl/authorize" +
-                            "?contextid=$contextId"
-                )
-            )
-            .header(
-                "Authorization",
-                "Bearer $accessToken"
-            )
+            .uri(URI.create("$streamingUrl/authorize?contextid=$contextId"))
+            .header("Authorization", "Bearer $accessToken")
             .PUT(HttpRequest.BodyPublishers.noBody())
             .build()
 
-        val response = httpClient.send(
-            request,
-            HttpResponse.BodyHandlers.ofString()
-        )
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
         if (response.statusCode() != 202) {
             throw IllegalStateException(
-                "Failed to re-authorize Saxo stream. " +
-                        "Status=${response.statusCode()}, " +
-                        "body=${response.body()}"
+                "Failed to re-authorize Saxo stream. Status=${response.statusCode()}, body=${response.body()}"
             )
         }
 

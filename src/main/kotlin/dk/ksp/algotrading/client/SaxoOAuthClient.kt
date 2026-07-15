@@ -67,23 +67,12 @@ class SaxoOAuthClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create(tokenUrl))
-            .header(
-                "Content-Type",
-                "application/x-www-form-urlencoded"
-            )
-            .header(
-                "Authorization",
-                "Basic $credentials"
-            )
-            .POST(
-                HttpRequest.BodyPublishers.ofString(requestBody)
-            )
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .header("Authorization", "Basic $credentials")
+            .POST(HttpRequest.BodyPublishers.ofString(requestBody))
             .build()
 
-        val response = httpClient.send(
-            request,
-            HttpResponse.BodyHandlers.ofString()
-        )
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
         if (response.statusCode() !in 200..299) {
             throw IllegalStateException(
@@ -96,9 +85,5 @@ class SaxoOAuthClient(
         return objectMapper.readValue(response.body())
     }
 
-    private fun encode(value: String): String =
-        URLEncoder.encode(
-            value,
-            StandardCharsets.UTF_8
-        )
+    private fun encode(value: String) = URLEncoder.encode(value, StandardCharsets.UTF_8)
 }
