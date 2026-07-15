@@ -4,6 +4,7 @@ import dk.ksp.algotrading.client.SaxoClient
 import dk.ksp.algotrading.entity.TradingAccount
 import dk.ksp.algotrading.repository.TradingAccountRepository
 import dk.ksp.algotrading.service.SaxoSynchronizationService
+import dk.ksp.algotrading.service.SaxoTokenService
 import dk.ksp.algotrading.service.StreamingService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -22,11 +23,21 @@ class StartupConfig(
     private val saxoSynchronizationService: SaxoSynchronizationService,
     @Value("\${saxo-sim-api.base-url}")
     private val baseUrl: String,
+    private val saxoTokenService: SaxoTokenService
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Bean
     fun initTrader() = CommandLineRunner {
+        if (!saxoTokenService.hasToken()) {
+            logger.warn(
+                "Saxo has not been authorized. " +
+                        "Open /api/saxo/oauth/login"
+            )
+
+            return@CommandLineRunner
+        }
+
         if (tradingAccountRepository.count() == 0L) {
             logger.info("Initializing trader in database")
             val saxoClientDetails = saxoClient.getSaxoClient()
@@ -53,6 +64,10 @@ class StartupConfig(
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
+        if (!saxoTokenService.hasToken()) {
+            return
+        }
+
         saxoSynchronizationService.synchronize()
         tradeMessageStreamingService.connect()
     }
