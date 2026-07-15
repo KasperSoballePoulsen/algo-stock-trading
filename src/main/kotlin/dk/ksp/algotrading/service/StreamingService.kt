@@ -8,7 +8,12 @@ import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.enum.SaxoEventActivity
 import jakarta.annotation.PreDestroy
+import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Service
 class StreamingService(
@@ -16,19 +21,76 @@ class StreamingService(
     private val notificationService: NotificationService,
     private val tradingService: TradingService
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val connected = AtomicBoolean(false)
+    private val connecting = AtomicBoolean(false)
+    private val reconnectScheduled = AtomicBoolean(false)
+    private val shuttingDown = AtomicBoolean(false)
+    private val reconnectExecutor = Executors.newSingleThreadScheduledExecutor()
+
 
     fun connect() {
 
+        if (shuttingDown.get() || connected.get()) return
+
+        if (!connecting.compareAndSet(false, true)) return
+
+
+        logger.info("Connecting to Saxo stream")
 
         saxoStreamingClient.openWebsocket(
             onConnected = {
-                saxoStreamingClient.createTradeMessageSubscription("trade-messages")
-                saxoStreamingClient.createClientEventsSubscription(
-                    "Order-detail-messages",
-                    listOf(SaxoEventActivity.ORDERS)
-                )
+                connecting.set(false)
+                connected.set(true)
+                reconnectScheduled.set(false)
+
+                try {
+                    createSubscriptions()
+                    logger.info("Connected to Saxo stream")
+                } catch (error: Exception) {
+                    logger.error(
+                        "Connected to Saxo stream, but subscription creation failed",
+                        error
+                    )
+                    connected.set(false)
+                    saxoStreamingClient.close()
+                    scheduleReconnect(error)
+                }
+            },
+            onDisconnected = { error ->
+                connected.set(false)
+                connecting.set(false)
+
+                scheduleReconnect(error)
             },
             onMessage = ::handleMessages
+        )
+    }
+
+    private fun createSubscriptions() {
+        saxoStreamingClient.createTradeMessageSubscription("trade-messages")
+
+        saxoStreamingClient.createClientEventsSubscription(
+            "order-detail-messages",
+            listOf(SaxoEventActivity.ORDERS)
+        )
+    }
+
+    private fun scheduleReconnect(error: Throwable?) {
+        if (shuttingDown.get()) return
+
+        if (!reconnectScheduled.compareAndSet(false, true)) return
+
+        logger.warn("Saxo stream disconnected. Reconnecting in 10 seconds", error
+        )
+
+        reconnectExecutor.schedule(
+            {
+                reconnectScheduled.set(false)
+                connect()
+            },
+            10,
+            TimeUnit.SECONDS
         )
     }
 
@@ -61,6 +123,10 @@ class StreamingService(
 
     @PreDestroy
     fun shutdown() {
+        logger.info("Shutting down Saxo streaming connection")
+
+        shuttingDown.set(true)
+        reconnectExecutor.shutdownNow()
         saxoStreamingClient.close()
     }
 }

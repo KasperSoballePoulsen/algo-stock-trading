@@ -87,14 +87,15 @@ class SaxoStreamingClient(
 
     }
 
-    fun openWebsocket(onConnected: () -> Unit, onMessage: (List<SaxoStreamEvent>) -> Unit) {
+    fun openWebsocket(onConnected: () -> Unit, onDisconnected: (Throwable?) -> Unit, onMessage: (List<SaxoStreamEvent>) -> Unit) {
         val uri = URI.create("wss://sim-streaming.saxobank.com/sim/oapi/streaming/ws/connect?contextId=$contextId")
         httpClient.newWebSocketBuilder()
             .header("Authorization", "Bearer $saxoToken")
-            .buildAsync(uri, SaxoWebSocketListener(messageParser, onConnected, onMessage))
+            .buildAsync(uri, SaxoWebSocketListener(messageParser, onConnected, onDisconnected, onMessage))
             .thenAccept { webSocket = it }
-            .exceptionally {
-                logger.error("Could not connect to Saxo stream", it)
+            .exceptionally { error ->
+                logger.error("Could not connect to Saxo stream", error)
+                onDisconnected(error)
                 null
             }
     }
