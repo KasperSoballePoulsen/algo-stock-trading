@@ -20,8 +20,8 @@ class SaxoOAuthService(
     private val saxoTokenService: SaxoTokenService
 ) {
 
-    fun createAuthorizationUrl(state: String): String {
-        return UriComponentsBuilder
+    fun createAuthorizationUrl(state: String) =
+        UriComponentsBuilder
             .fromUriString(authorizationUrl)
             .queryParam("response_type", "code")
             .queryParam("client_id", appKey)
@@ -30,7 +30,7 @@ class SaxoOAuthService(
             .build()
             .encode()
             .toUriString()
-    }
+
 
     fun handleCallback(authorizationCode: String) {
         val tokens = saxoOAuthClient.exchangeAuthorizationCode(authorizationCode)

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
+private const val OAUTH_STATE = "saxo-oauth-state"
+
 @RestController
 @RequestMapping("/api/saxo/oauth")
 class SaxoOAuthController(
@@ -17,10 +19,7 @@ class SaxoOAuthController(
 ) {
 
     @GetMapping("/login")
-    fun login(
-        session: HttpSession,
-        response: HttpServletResponse
-    ) {
+    fun login(session: HttpSession, response: HttpServletResponse) {
         val state = UUID.randomUUID().toString()
 
         session.setAttribute(OAUTH_STATE, state)
@@ -34,7 +33,7 @@ class SaxoOAuthController(
         @RequestParam state: String,
         session: HttpSession
     ): ResponseEntity<String> {
-        val expectedState = session.getAttribute(OAUTH_STATE) as? String //this is ugly
+        val expectedState = session.getAttribute(OAUTH_STATE)?.toString()
 
         if (expectedState == null || expectedState != state) {
             return ResponseEntity
@@ -47,9 +46,5 @@ class SaxoOAuthController(
         saxoOAuthService.handleCallback(code)
 
         return ResponseEntity.ok("Saxo authorization completed. You can now restart the application.")
-    }
-
-    companion object {
-        private const val OAUTH_STATE = "saxo-oauth-state"
     }
 }

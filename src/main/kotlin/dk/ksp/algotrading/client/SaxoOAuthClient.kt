@@ -56,10 +56,7 @@ class SaxoOAuthClient(
     private fun requestTokens(
         parameters: Map<String, String>
     ): SaxoTokenResponseDTO {
-        val credentials = Base64.getEncoder().encodeToString(
-            "$appKey:$appSecret"
-                .toByteArray(StandardCharsets.UTF_8)
-        )
+        val credentials = Base64.getEncoder().encodeToString("$appKey:$appSecret".toByteArray())
 
         val requestBody = parameters.entries.joinToString("&") {
             "${encode(it.key)}=${encode(it.value)}"
@@ -76,9 +73,7 @@ class SaxoOAuthClient(
 
         if (response.statusCode() !in 200..299) {
             throw IllegalStateException(
-                "Saxo OAuth token request failed. " +
-                        "Status=${response.statusCode()}, " +
-                        "body=${response.body()}"
+                "Saxo OAuth token request failed. Status=${response.statusCode()}, body=${response.body()}"
             )
         }
 

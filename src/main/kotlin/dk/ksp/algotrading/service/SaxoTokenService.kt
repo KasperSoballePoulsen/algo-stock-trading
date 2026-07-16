@@ -4,6 +4,7 @@ import dk.ksp.algotrading.dto.saxo.response.SaxoTokenResponseDTO
 import dk.ksp.algotrading.entity.SaxoOAuthToken
 import dk.ksp.algotrading.event.SaxoAccessTokenRefreshedEvent
 import dk.ksp.algotrading.client.SaxoOAuthClient
+import dk.ksp.algotrading.mapper.toSaxoOAuthTokenEntity
 import dk.ksp.algotrading.repository.SaxoOAuthTokenRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -12,24 +13,23 @@ import java.time.Instant
 
 @Service
 class SaxoTokenService(
-    private val tokenRepository: SaxoOAuthTokenRepository,
+    private val saxoOAuthTokenRepository: SaxoOAuthTokenRepository,
     private val saxoOAuthClient: SaxoOAuthClient,
     private val eventPublisher: ApplicationEventPublisher
 ) {
     private val refreshLock = Any()
 
-    fun hasToken() = tokenRepository.existsById(TOKEN_ID)
+    fun hasToken() = saxoOAuthTokenRepository.existsById(TOKEN_ID)
 
-    @Transactional
     fun saveInitialTokens(response: SaxoTokenResponseDTO) {
-        tokenRepository.save(createToken(response))
+        saxoOAuthTokenRepository.save(response.toSaxoOAuthTokenEntity(Instant.now()))
     }
 
     fun getValidAccessToken(): String {
         var refreshedAccessToken: String? = null
 
         val accessToken = synchronized(refreshLock) {
-            val token = tokenRepository.findById(TOKEN_ID)
+            val token = saxoOAuthTokenRepository.findById(TOKEN_ID)
                 .orElseThrow {
                     IllegalStateException(
                         "Saxo has not been authorized. Open /api/saxo/oauth/login first."
@@ -50,13 +50,13 @@ class SaxoTokenService(
 
             val response = saxoOAuthClient.refreshTokens(token.refreshToken)
 
-            val updatedToken = createToken(response)
+            val newTokens = response.toSaxoOAuthTokenEntity(Instant.now())
 
-            tokenRepository.saveAndFlush(updatedToken)
+            saxoOAuthTokenRepository.saveAndFlush(newTokens)
 
-            refreshedAccessToken = updatedToken.accessToken
+            refreshedAccessToken = newTokens.accessToken
 
-            updatedToken.accessToken
+            newTokens.accessToken
         }
 
         refreshedAccessToken?.let {
@@ -64,20 +64,6 @@ class SaxoTokenService(
         }
 
         return accessToken
-    }
-
-
-    private fun createToken(response: SaxoTokenResponseDTO): SaxoOAuthToken {
-        val now = Instant.now()
-
-        return SaxoOAuthToken(
-            id = TOKEN_ID,
-            accessToken = response.accessToken,
-            refreshToken = response.refreshToken,
-            tokenType = response.tokenType,
-            accessTokenExpiresAt = now.plusSeconds(response.expiresIn),
-            refreshTokenExpiresAt = now.plusSeconds(response.refreshTokenExpiresIn)
-        )
     }
 
     companion object {

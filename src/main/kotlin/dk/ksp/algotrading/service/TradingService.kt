@@ -41,9 +41,6 @@ class TradingService(
 
         val tradingAccount = tradingAccountRepository.getTradingAccount()
 
-        if (quantity <= 0) throw IllegalArgumentException("Quantity must be positive")
-        if (symbol.isBlank()) throw IllegalArgumentException("Symbol is required")
-
         val normalizedSymbol = symbol.uppercase()
 
         val isManualOrder = when (initiator) {
