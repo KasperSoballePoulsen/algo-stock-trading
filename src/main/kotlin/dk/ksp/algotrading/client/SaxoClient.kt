@@ -16,24 +16,22 @@ import dk.ksp.algotrading.dto.saxo.response.SaxoAccountBalancesDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoNetPositionsResponse
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderActivitiesResponseDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderErrorResponseDTO
-import dk.ksp.algotrading.dto.saxo.response.SaxoOrderEventDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderSuccessResponseDTO
 import dk.ksp.algotrading.enum.AssetType
 import dk.ksp.algotrading.enum.DurationType
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.exception.BrokerRejectedException
-import org.springframework.scheduling.annotation.Scheduled
-import java.time.Duration
+import dk.ksp.algotrading.service.SaxoTokenService
 
 @Component
 class SaxoClient(
-    @Value("\${saxo-sim-api.api-token}")
-    private val saxoToken: String,
+    private val saxoTokenService: SaxoTokenService,
     @Value("\${saxo-sim-api.base-url}")
     private val baseUrl: String,
     private val objectMapper: ObjectMapper,
     private val httpClient: HttpClient
 ) {
+    private val authorizationHeader: String get() = "Bearer ${saxoTokenService.getValidAccessToken()}"
 
     fun sendOrder(
         saxoAccountKey: String,
@@ -59,7 +57,7 @@ class SaxoClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/trade/v2/orders"))
-            .header("Authorization", "Bearer $saxoToken")
+            .header("Authorization", authorizationHeader)
             .header("Content-Type", "application/json")
             .POST(
                 HttpRequest.BodyPublishers.ofString(
@@ -90,7 +88,7 @@ class SaxoClient(
     fun getSaxoClient(): SaxoClientDTO {
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/port/v1/clients/me"))
-            .header("Authorization", "Bearer $saxoToken")
+            .header("Authorization", authorizationHeader)
             .GET()
             .build()
 
@@ -109,7 +107,7 @@ class SaxoClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/port/v1/balances?AccountKey=${saxoAccountKey}&ClientKey=${saxoClientKey}"))
-            .header("Authorization", "Bearer $saxoToken")
+            .header("Authorization", authorizationHeader)
             .GET()
             .build()
 
@@ -131,7 +129,7 @@ class SaxoClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/port/v1/netpositions?AccountKey=$saxoAccountKey&ClientKey=$saxoClientKey"))
-            .header("Authorization", "Bearer $saxoToken")
+            .header("Authorization", authorizationHeader)
             .GET()
             .build()
 
@@ -154,7 +152,7 @@ class SaxoClient(
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create(orderHistoryNextPollUrl))
-            .header("Authorization", "Bearer $saxoToken")
+            .header("Authorization", authorizationHeader)
             .GET()
             .build()
 

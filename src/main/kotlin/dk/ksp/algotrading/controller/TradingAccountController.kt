@@ -5,6 +5,9 @@ import dk.ksp.algotrading.dto.response.PortfolioDTO
 import dk.ksp.algotrading.dto.response.OrderDTO
 import dk.ksp.algotrading.service.TradingAccountService
 import dk.ksp.algotrading.service.TradingService
+import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -20,9 +23,11 @@ class TradingAccountController(
 
     @PostMapping("/orders")
     fun createOrder(
-        @RequestBody request: OrderRequestDTO
-    ): OrderDTO {
-        return tradingService.createOrder(
+        @Valid
+        @RequestBody
+        request: OrderRequestDTO
+    ): ResponseEntity<OrderDTO> {
+        val order = tradingService.createOrder(
             request.symbol,
             request.quantity,
             request.buySell,
@@ -31,6 +36,10 @@ class TradingAccountController(
             request.assetType,
             request.durationType
         )
+
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(order)
     }
 
     @PostMapping("/portfolio/refresh")

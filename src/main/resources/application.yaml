@@ -18,5 +18,11 @@ ntfy:
   base-url: ${NTFY_BASE_URL}
 
 saxo-sim-api:
-  base-url: ${SAXO_SIM_BASE_URL}
-  api-token: ${SAXO_24H_TOKEN}
+  base-url: https://gateway.saxobank.com/sim/openapi
+  streaming-url: wss://sim-streaming.saxobank.com/sim/oapi/streaming/ws
+  oauth:
+    app-key: ${SAXO_APP_KEY}
+    app-secret: ${SAXO_APP_SECRET}
+    redirect-url: http://localhost:8080/api/saxo/oauth/callback
+    authorization-url: https://sim.logonvalidation.net/authorize
+    token-url: https://sim.logonvalidation.net/token

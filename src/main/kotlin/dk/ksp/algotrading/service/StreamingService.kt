@@ -9,11 +9,12 @@ import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.enum.SaxoEventActivity
 import jakarta.annotation.PreDestroy
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import dk.ksp.algotrading.event.SaxoAccessTokenRefreshedEvent
+import org.springframework.context.event.EventListener
 
 @Service
 class StreamingService(
@@ -129,4 +130,17 @@ class StreamingService(
         reconnectExecutor.shutdownNow()
         saxoStreamingClient.close()
     }
+
+    @EventListener
+    fun onAccessTokenRefreshed(event: SaxoAccessTokenRefreshedEvent) {
+        if (!connected.get() || shuttingDown.get()) return
+
+        try {
+            saxoStreamingClient.authorizeStreamingContext(event.accessToken)
+        } catch (error: Exception) {
+            logger.error("Could not re-authorize Saxo stream", error)
+            saxoStreamingClient.close()
+        }
+    }
+
 }
