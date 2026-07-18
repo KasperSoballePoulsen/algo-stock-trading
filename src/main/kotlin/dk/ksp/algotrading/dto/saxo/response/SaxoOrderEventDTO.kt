@@ -12,35 +12,17 @@ data class SaxoOrderEventDTO(
     @JsonProperty("AccountId")
     val accountId: String,
 
-    @JsonProperty("ActivityTime")
-    val activityTime: Instant,
-
     @JsonProperty("Amount")
     val amount: Double,
-
-    @JsonProperty("AssetType")
-    val assetType: String,
 
     @JsonProperty("BuySell")
     val buySell: String,
 
-    @JsonProperty("ClientId")
-    val clientId: String,
-
-    @JsonProperty("CorrelationKey")
-    val correlationKey: String,
-
     @JsonProperty("Duration")
     val duration: SaxoDurationDTO,
 
-    @JsonProperty("HandledBy")
-    val handledBy: String,
-
     @JsonProperty("OrderId")
     val orderId: String,
-
-    @JsonProperty("OrderRelation")
-    val orderRelation: String,
 
     @JsonProperty("OrderType")
     val orderType: String,
@@ -57,23 +39,6 @@ data class SaxoOrderEventDTO(
     @JsonProperty("AveragePrice")
     val averagePrice: BigDecimal? = null,
 
-    @JsonProperty("ExecutionPrice")
-    val executionPrice: BigDecimal? = null,
-
-    @JsonProperty("FillAmount")
-    val fillAmount: BigDecimal? = null,
-
-    @JsonProperty("FilledAmount")
-    val filledAmount: BigDecimal? = null,
-
-    @JsonProperty("PositionId")
-    val positionId: String? = null,
-
-    @JsonProperty("ValueDate")
-    val valueDate: LocalDate? = null,
-
-    @JsonProperty("Venue")
-    val venue: String? = null
 ) : SaxoStreamEvent
 
 data class SaxoDurationDTO(

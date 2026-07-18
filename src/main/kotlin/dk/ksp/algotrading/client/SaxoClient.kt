@@ -22,6 +22,7 @@ import dk.ksp.algotrading.enum.DurationType
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.exception.BrokerRejectedException
 import dk.ksp.algotrading.service.SaxoTokenService
+import org.springframework.web.util.UriComponentsBuilder
 
 @Component
 class SaxoClient(
@@ -43,20 +44,26 @@ class SaxoClient(
         assetType: AssetType,
         durationType: DurationType
     ): SaxoOrderSuccessResponseDTO {
-
         val requestBody = SaxoOrderRequestDTO(
-            saxoAccountKey,
-            amount,
-            buySell.saxoValue,
-            orderType.saxoValue,
-            manualOrder,
-            uic,
-            assetType.saxoValue,
-            SaxoOrderDurationDTO(durationType.saxoValue)
+            accountKey = saxoAccountKey,
+            amount = amount,
+            buySell = buySell.saxoValue,
+            orderType = orderType.saxoValue,
+            manualOrder = manualOrder,
+            uic = uic,
+            assetType = assetType.saxoValue,
+            orderDuration = SaxoOrderDurationDTO(durationType.saxoValue)
         )
 
+        val uri = UriComponentsBuilder
+            .fromUriString(baseUrl)
+            .path("/trade/v2/orders")
+            .build()
+            .encode()
+            .toUri()
+
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("$baseUrl/trade/v2/orders"))
+            .uri(uri)
             .header("Authorization", authorizationHeader)
             .header("Content-Type", "application/json")
             .POST(
@@ -67,10 +74,9 @@ class SaxoClient(
             .build()
 
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-        val body = response.body()
 
         if (response.statusCode() !in 200..299) {
-            val error = objectMapper.readValue<SaxoOrderErrorResponseDTO>(body)
+            val error: SaxoOrderErrorResponseDTO = objectMapper.readValue(response.body())
 
             throw BrokerRejectedException(
                 error.resolvedMessage,
@@ -79,11 +85,9 @@ class SaxoClient(
             )
         }
 
-        val saxoOrder = objectMapper.readValue<SaxoOrderSuccessResponseDTO>(body)
-
-        return saxoOrder
-
+        return objectMapper.readValue(response.body())
     }
+
 
     fun getSaxoClient(): SaxoClientDTO {
         val request = HttpRequest.newBuilder()
@@ -100,13 +104,22 @@ class SaxoClient(
             )
         }
 
-        return objectMapper.readValue<SaxoClientDTO>(response.body())
+        return objectMapper.readValue(response.body())
     }
 
     fun getSaxoAccountBalances(saxoClientKey: String, saxoAccountKey: String): SaxoAccountBalancesDTO {
 
+        val uri = UriComponentsBuilder
+            .fromUriString(baseUrl)
+            .path("/port/v1/balances")
+            .queryParam("AccountKey", saxoAccountKey)
+            .queryParam("ClientKey", saxoClientKey)
+            .build()
+            .encode()
+            .toUri()
+
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("$baseUrl/port/v1/balances?AccountKey=${saxoAccountKey}&ClientKey=${saxoClientKey}"))
+            .uri(uri)
             .header("Authorization", authorizationHeader)
             .GET()
             .build()
@@ -119,7 +132,7 @@ class SaxoClient(
             )
         }
 
-        return objectMapper.readValue<SaxoAccountBalancesDTO>(response.body())
+        return objectMapper.readValue(response.body())
     }
 
     fun getNetPositions(
@@ -127,8 +140,17 @@ class SaxoClient(
         saxoAccountKey: String
     ): SaxoNetPositionsResponse {
 
+        val uri = UriComponentsBuilder
+            .fromUriString(baseUrl)
+            .path("/port/v1/netpositions")
+            .queryParam("AccountKey", saxoAccountKey)
+            .queryParam("ClientKey", saxoClientKey)
+            .build()
+            .encode()
+            .toUri()
+
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("$baseUrl/port/v1/netpositions?AccountKey=$saxoAccountKey&ClientKey=$saxoClientKey"))
+            .uri(uri)
             .header("Authorization", authorizationHeader)
             .GET()
             .build()
@@ -141,7 +163,7 @@ class SaxoClient(
             )
         }
 
-        return objectMapper.readValue<SaxoNetPositionsResponse>(response.body())
+        return objectMapper.readValue(response.body())
     }
 
 
@@ -164,7 +186,7 @@ class SaxoClient(
             )
         }
 
-        return objectMapper.readValue<SaxoOrderActivitiesResponseDTO>(response.body())
+        return objectMapper.readValue(response.body())
     }
 
 }

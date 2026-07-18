@@ -2,6 +2,7 @@ package dk.ksp.algotrading.entity
 
 import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.BuySell
+import dk.ksp.algotrading.enum.DurationType
 import dk.ksp.algotrading.enum.OrderType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -36,6 +37,10 @@ class Order(
     val saxoOrderId: String? = null,
 
     var executedPrice: BigDecimal? = null,
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    var duration: DurationType,
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

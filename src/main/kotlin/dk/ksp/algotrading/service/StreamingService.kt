@@ -4,6 +4,7 @@ import dk.ksp.algotrading.client.SaxoStreamingClient
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderEventDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoStreamEvent
 import dk.ksp.algotrading.dto.saxo.response.SaxoTradeMessageDTO
+import dk.ksp.algotrading.enum.DurationType
 import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.enum.SaxoEventActivity
@@ -108,11 +109,12 @@ class StreamingService(
 
     private fun handleOrderEvent(orderEvent: SaxoOrderEventDTO) {
         tradingService.updateOrder(
-            orderEvent.orderId,
-            OrderStatus.fromSaxoValue(orderEvent.status),
-            OrderType.fromSaxoValue(orderEvent.orderType),
-            orderEvent.amount.toLong(),
-            orderEvent.executionPrice
+            saxoOrderId = orderEvent.orderId,
+            orderStatus = OrderStatus.fromSaxoValue(orderEvent.status),
+            orderType = OrderType.fromSaxoValue(orderEvent.orderType),
+            quantity = orderEvent.amount.toLong(),
+            duration = DurationType.fromSaxoValue(orderEvent.duration.durationType),
+            executionPrice = orderEvent.averagePrice
         )
     }
 

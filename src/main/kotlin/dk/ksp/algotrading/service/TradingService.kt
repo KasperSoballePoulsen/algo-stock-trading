@@ -51,14 +51,14 @@ class TradingService(
 
         return try {
             val saxoOrder = saxoClient.sendOrder(
-                tradingAccount.saxoAccountKey,
-                quantity,
-                buySell,
-                orderType,
-                isManualOrder,
-                uic,
-                assetType,
-                durationType
+                saxoAccountKey = tradingAccount.saxoAccountKey,
+                amount = quantity,
+                buySell = buySell,
+                orderType = orderType,
+                manualOrder = isManualOrder,
+                uic = uic,
+                assetType = assetType,
+                durationType = durationType
             )
 
             val createdStatus = OrderStatus.PLACED
@@ -73,6 +73,7 @@ class TradingService(
                     status = createdStatus,
                     orderType = orderType,
                     tradingAccount = tradingAccount,
+                    duration = durationType,
                 )
             )
 
@@ -87,6 +88,7 @@ class TradingService(
                     status = OrderStatus.REJECTED,
                     orderType = orderType,
                     tradingAccount = tradingAccount,
+                    duration = durationType
                 )
             )
             throw ex
@@ -99,6 +101,7 @@ class TradingService(
         orderStatus: OrderStatus,
         orderType: OrderType,
         quantity: Long,
+        duration: DurationType,
         executionPrice: BigDecimal?
     ) {
         val order = orderRepository.findBySaxoOrderId(saxoOrderId)
@@ -108,13 +111,14 @@ class TradingService(
             return
         }
 
-        executionPrice?.let {
-            order.executedPrice = it
+        if (executionPrice != null) {
+            order.executedPrice = executionPrice
         }
 
         order.status = orderStatus
         order.orderType = orderType
         order.quantity = quantity
+        order.duration = duration
     }
 
 
@@ -131,7 +135,7 @@ class TradingService(
                 existingOrder.orderType = OrderType.fromSaxoValue(orderEvent.orderType)
                 existingOrder.quantity = orderEvent.amount.toLong()
 
-                orderEvent.executionPrice?.let {
+                orderEvent.averagePrice?.let {
                     existingOrder.executedPrice = it
                 }
             } else {
@@ -142,15 +146,16 @@ class TradingService(
 
                 orderRepository.save(
                     Order(
-                        Instrument.fromUIC(orderEvent.uic),
-                        orderEvent.uic,
-                        BuySell.fromSaxoValue(orderEvent.buySell),
-                        orderEvent.amount.toLong(),
-                        orderEvent.orderId,
-                        orderEvent.executionPrice,
-                        OrderStatus.fromSaxoValue(orderEvent.status),
-                        OrderType.fromSaxoValue(orderEvent.orderType),
-                        account
+                        symbol = Instrument.fromUIC(orderEvent.uic),
+                        uic = orderEvent.uic,
+                        buySell = BuySell.fromSaxoValue(orderEvent.buySell),
+                        quantity = orderEvent.amount.toLong(),
+                        saxoOrderId = orderEvent.orderId,
+                        executedPrice = orderEvent.averagePrice,
+                        duration = DurationType.fromSaxoValue(orderEvent.duration.durationType),
+                        status = OrderStatus.fromSaxoValue(orderEvent.status),
+                        orderType = OrderType.fromSaxoValue(orderEvent.orderType),
+                        tradingAccount = account
                     )
                 )
             }
