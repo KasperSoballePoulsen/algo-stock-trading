@@ -28,8 +28,6 @@ class SaxoStreamingClient(
     private val httpClient: HttpClient,
     private val messageParser: SaxoStreamMessageParser,
     private val saxoTokenService: SaxoTokenService,
-
-
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private var webSocket: WebSocket? = null

@@ -1,15 +1,17 @@
 package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.dto.saxo.response.SaxoTokenResponseDTO
-import dk.ksp.algotrading.entity.SaxoOAuthToken
 import dk.ksp.algotrading.event.SaxoAccessTokenRefreshedEvent
 import dk.ksp.algotrading.client.SaxoOAuthClient
 import dk.ksp.algotrading.mapper.toSaxoOAuthTokenEntity
 import dk.ksp.algotrading.repository.SaxoOAuthTokenRepository
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+
+private const val TOKEN_ID = 1L
+private const val REFRESH_MARGIN_SECONDS = 120L
 
 @Service
 class SaxoTokenService(
@@ -17,57 +19,71 @@ class SaxoTokenService(
     private val saxoOAuthClient: SaxoOAuthClient,
     private val eventPublisher: ApplicationEventPublisher
 ) {
-    private val refreshLock = Any()
 
     fun hasToken() = saxoOAuthTokenRepository.existsById(TOKEN_ID)
 
     fun saveInitialTokens(response: SaxoTokenResponseDTO) {
-        saxoOAuthTokenRepository.save(response.toSaxoOAuthTokenEntity(Instant.now()))
+        val token = response.toSaxoOAuthTokenEntity(Instant.now())
+        saxoOAuthTokenRepository.save(token)
     }
 
     fun getValidAccessToken(): String {
-        var refreshedAccessToken: String? = null
+        val result = getOrRefreshToken()
 
-        val accessToken = synchronized(refreshLock) {
-            val token = saxoOAuthTokenRepository.findById(TOKEN_ID)
-                .orElseThrow {
-                    IllegalStateException(
-                        "Saxo has not been authorized. Open /api/saxo/oauth/login first."
-                    )
-                }
+        if (result.refreshed) {
+            eventPublisher.publishEvent(SaxoAccessTokenRefreshedEvent(result.accessToken))
+        }
 
-            val refreshThreshold = Instant.now().plusSeconds(REFRESH_MARGIN_SECONDS)
+        return result.accessToken
+    }
 
-            if (token.accessTokenExpiresAt.isAfter(refreshThreshold)) {
-                return@synchronized token.accessToken
-            }
-
-            if (token.refreshTokenExpiresAt.isBefore(Instant.now())) {
-                throw IllegalStateException(
-                    "Saxo refresh token has expired. Authorization is required again."
+    @Synchronized
+    private fun getOrRefreshToken(): TokenResult {
+        val token = saxoOAuthTokenRepository.findById(TOKEN_ID)
+            .orElseThrow {
+                IllegalStateException(
+                    "Saxo has not been authorized. Open /api/saxo/oauth/login first."
                 )
             }
 
-            val response = saxoOAuthClient.refreshTokens(token.refreshToken)
+        val now = Instant.now()
+        val refreshThreshold = now.plusSeconds(REFRESH_MARGIN_SECONDS)
 
-            val newTokens = response.toSaxoOAuthTokenEntity(Instant.now())
-
-            saxoOAuthTokenRepository.saveAndFlush(newTokens)
-
-            refreshedAccessToken = newTokens.accessToken
-
-            newTokens.accessToken
+        if (token.accessTokenExpiresAt.isAfter(refreshThreshold)) {
+            return TokenResult(
+                accessToken = token.accessToken,
+                refreshed = false
+            )
         }
 
-        refreshedAccessToken?.let {
-            eventPublisher.publishEvent(SaxoAccessTokenRefreshedEvent(it))
+        if (!token.refreshTokenExpiresAt.isAfter(now)) {
+            throw IllegalStateException(
+                "Saxo refresh token has expired. Authorization is required again."
+            )
         }
 
-        return accessToken
+        val response = saxoOAuthClient.refreshTokens(token.refreshToken)
+        val newTokens = response.toSaxoOAuthTokenEntity(Instant.now())
+
+        saxoOAuthTokenRepository.saveAndFlush(newTokens)
+
+        return TokenResult(
+            accessToken = newTokens.accessToken,
+            refreshed = true
+        )
     }
 
-    companion object {
-        private const val TOKEN_ID = 1L
-        private const val REFRESH_MARGIN_SECONDS = 120L
+    @Scheduled(fixedDelayString = "PT1M", initialDelayString = "PT1M")
+    fun refreshTokenIfNecessary() {
+        if (!hasToken()) {
+            return
+        }
+
+        getValidAccessToken()
     }
+
+    private data class TokenResult(
+        val accessToken: String,
+        val refreshed: Boolean
+    )
 }
