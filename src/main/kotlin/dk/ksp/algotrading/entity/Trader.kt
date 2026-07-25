@@ -15,6 +15,9 @@ class Trader protected constructor(
     val username: String,
 
     @Column(nullable = false)
+    var passwordHash: String,
+
+    @Column(nullable = false)
     val saxoClientKey: String,
 
     @Id
@@ -30,9 +33,10 @@ class Trader protected constructor(
     companion object {
         internal fun createForAccount(
             username: String,
+            passwordHash: String,
             saxoClientKey: String
         ): Trader {
-            return Trader(username, saxoClientKey)
+            return Trader(username, passwordHash, saxoClientKey)
         }
     }
 }

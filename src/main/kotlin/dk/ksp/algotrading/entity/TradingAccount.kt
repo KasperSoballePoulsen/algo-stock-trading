@@ -45,13 +45,14 @@ class TradingAccount protected constructor(
     companion object {
         fun createWithTrader(
             username: String,
+            passwordHash: String,
             saxoClientKey: String,
             saxoAccountKey: String,
             saxoAccountId: String,
             orderHistoryNextPollUrl: String
 
         ): TradingAccount {
-            val trader = Trader.createForAccount(username, saxoClientKey)
+            val trader = Trader.createForAccount(username, passwordHash, saxoClientKey)
 
             return TradingAccount(saxoAccountKey, saxoAccountId, trader, orderHistoryNextPollUrl)
         }

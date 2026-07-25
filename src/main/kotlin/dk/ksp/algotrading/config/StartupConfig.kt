@@ -13,6 +13,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
+import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Instant
 
 @Configuration
@@ -23,7 +24,12 @@ class StartupConfig(
     private val saxoSynchronizationService: SaxoSynchronizationService,
     @Value("\${saxo-sim-api.base-url}")
     private val baseUrl: String,
-    private val saxoTokenService: SaxoTokenService
+    private val saxoTokenService: SaxoTokenService,
+    private val passwordEncoder: PasswordEncoder,
+    @Value("\${app.initial-trader.username}")
+    private val initialUsername: String,
+    @Value("\${app.initial-trader.password}")
+    private val initialPassword: String
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -48,11 +54,12 @@ class StartupConfig(
 
             tradingAccountRepository.save(
                 TradingAccount.createWithTrader(
-                    "Kasper",
-                    saxoClientDetails.clientKey,
-                    saxoClientDetails.defaultAccountKey,
-                    saxoClientDetails.defaultAccountId,
-                    initialOrderHistoryUrl
+                    username = initialUsername,
+                    passwordHash = passwordEncoder.encode(initialPassword),
+                    saxoClientKey = saxoClientDetails.clientKey,
+                    saxoAccountKey = saxoClientDetails.defaultAccountKey,
+                    saxoAccountId = saxoClientDetails.defaultAccountId,
+                    orderHistoryNextPollUrl = initialOrderHistoryUrl
                 )
             )
         }

@@ -26,3 +26,8 @@ saxo-sim-api:
     redirect-url: http://localhost:8080/api/saxo/oauth/callback
     authorization-url: https://sim.logonvalidation.net/authorize
     token-url: https://sim.logonvalidation.net/token
+
+app:
+  initial-trader:
+    username: ${TRADER_USERNAME}
+    password: ${TRADER_PASSWORD}
