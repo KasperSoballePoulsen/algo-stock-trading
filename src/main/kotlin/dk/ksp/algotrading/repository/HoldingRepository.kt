@@ -7,22 +7,18 @@ import org.springframework.data.jpa.repository.Query
 
 interface HoldingRepository : JpaRepository<Holding, Long> {
 
-    @Query(
-        """
+    @Query("""
     SELECT h
     FROM Holding h
-    WHERE h.tradingAccount._id = :accountId
-    """
-    )
+    WHERE h.saxoTradingAccount._id = :accountId
+    """)
     fun findAllByAccountId(accountId: Long): List<Holding>
 
 
     @Modifying
-    @Query(
-        """
+    @Query("""
     DELETE FROM Holding h
-    WHERE h.tradingAccount.id = :accountId
-    """
-    )
+    WHERE h.saxoTradingAccount._id = :accountId
+    """)
     fun deleteAllByTradingAccountId(accountId: Long)
 }

@@ -10,12 +10,12 @@ spring:
       ddl-auto: update
 
 finnhub:
-  base-url: ${FINNHUB_BASE_URL}
+  base-url: https://finnhub.io/api/v1
   api-key: ${FINNHUB_API_KEY}
 
 ntfy:
   topic-name: ${NTFY_TOPIC_NAME}
-  base-url: ${NTFY_BASE_URL}
+  base-url: https://ntfy.sh
 
 saxo-sim-api:
   base-url: https://gateway.saxobank.com/sim/openapi
@@ -26,3 +26,8 @@ saxo-sim-api:
     redirect-url: http://localhost:8080/api/saxo/oauth/callback
     authorization-url: https://sim.logonvalidation.net/authorize
     token-url: https://sim.logonvalidation.net/token
+
+app:
+  initial-user:
+    username: ${USER_USERNAME}
+    password: ${USER_PASSWORD}
