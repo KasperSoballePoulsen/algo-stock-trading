@@ -8,15 +8,15 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
-import java.math.BigDecimal
-import java.time.Instant
 
 @Entity
-@Table(name = "trading_accounts")
-class TradingAccount protected constructor(
+@Table(name = "saxo_trading_accounts")
+class SaxoTradingAccount(
+
+    @ManyToOne
+    val saxoClient: SaxoClient,
 
     @Column(nullable = false)
     val saxoAccountKey: String,
@@ -24,9 +24,9 @@ class TradingAccount protected constructor(
     @Column(nullable = false, unique = true)
     val saxoAccountId: String,
 
-    @OneToOne(cascade = [CascadeType.PERSIST])
-    @JoinColumn(name = "trader_id", nullable = false, unique = true)
-    val trader: Trader,
+//    @OneToOne(cascade = [CascadeType.PERSIST])
+//    @JoinColumn(name = "user_id", nullable = false)
+//    val user: User,
 
     @Column(nullable = false)
     var orderHistoryNextPollUrl: String,
@@ -42,19 +42,19 @@ class TradingAccount protected constructor(
             "Cannot access id of a TradingAccount that has not been persisted"
         }
 
-    companion object {
-        fun createWithTrader(
-            username: String,
-            passwordHash: String,
-            saxoClientKey: String,
-            saxoAccountKey: String,
-            saxoAccountId: String,
-            orderHistoryNextPollUrl: String
-
-        ): TradingAccount {
-            val trader = Trader.createForAccount(username, passwordHash, saxoClientKey)
-
-            return TradingAccount(saxoAccountKey, saxoAccountId, trader, orderHistoryNextPollUrl)
-        }
-    }
+//    companion object {
+//        fun createWithTrader(
+//            username: String,
+//            passwordHash: String,
+//            saxoClientKey: String,
+//            saxoAccountKey: String,
+//            saxoAccountId: String,
+//            orderHistoryNextPollUrl: String
+//
+//        ): TradingAccount {
+//            val trader = Trader.createForAccount(username, passwordHash, saxoClientKey)
+//
+//            return TradingAccount(saxoAccountKey, saxoAccountId, trader, orderHistoryNextPollUrl)
+//        }
+//    }
 }

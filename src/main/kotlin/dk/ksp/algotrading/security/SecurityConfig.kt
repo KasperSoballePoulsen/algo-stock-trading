@@ -16,7 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    private val traderDetailsService: TraderDetailsService,
+    private val userDetailsService: UserDetailsService,
 ) {
 
 
@@ -34,9 +34,10 @@ class SecurityConfig(
 
             httpBasic { }
 
-            sessionManagement {
-                sessionCreationPolicy = SessionCreationPolicy.STATELESS
-            }
+//            sessionManagement {
+////                sessionCreationPolicy = SessionCreationPolicy.STATELESS
+//                sessionCreationPolicy = SessionCreationPolicy.IF_REQUIRED
+//            }
         }
 
         return http.build()
@@ -45,7 +46,7 @@ class SecurityConfig(
 
     @Bean
     fun authenticationProvider(passwordEncoder: PasswordEncoder): AuthenticationProvider =
-        DaoAuthenticationProvider(traderDetailsService).apply {
+        DaoAuthenticationProvider(userDetailsService).apply {
             setPasswordEncoder(passwordEncoder)
         }
 

@@ -52,7 +52,7 @@ class Order(
 
     @ManyToOne
     @JoinColumn(name = "trading_account_id", nullable = false)
-    val tradingAccount: TradingAccount,
+    val saxoTradingAccount: SaxoTradingAccount,
 
     @Column(nullable = false)
     val timestamp: Instant = Instant.now(),

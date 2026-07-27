@@ -8,8 +8,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "traders")
-class Trader protected constructor(
+@Table(name = "users")
+class User(
 
     @Column(nullable = false, unique = true)
     val username: String,
@@ -17,8 +17,8 @@ class Trader protected constructor(
     @Column(nullable = false)
     var passwordHash: String,
 
-    @Column(nullable = false)
-    val saxoClientKey: String,
+//    @Column(nullable = false)
+//    val saxoClientKey: String,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,14 +30,14 @@ class Trader protected constructor(
             "Cannot access id of a Trader that has not been persisted"
         }
 
-    companion object {
-        internal fun createForAccount(
-            username: String,
-            passwordHash: String,
-            saxoClientKey: String
-        ): Trader {
-            return Trader(username, passwordHash, saxoClientKey)
-        }
-    }
+//    companion object {
+//        internal fun createForAccount(
+//            username: String,
+//            passwordHash: String,
+//            saxoClientKey: String
+//        ): Trader {
+//            return Trader(username, passwordHash, saxoClientKey)
+//        }
+//    }
 }
 

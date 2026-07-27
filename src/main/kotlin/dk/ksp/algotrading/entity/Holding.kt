@@ -20,7 +20,7 @@ class Holding(
 
     @ManyToOne
     @JoinColumn(name = "trading_account_id", nullable = false)
-    val tradingAccount: TradingAccount,
+    val saxoTradingAccount: SaxoTradingAccount,
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
