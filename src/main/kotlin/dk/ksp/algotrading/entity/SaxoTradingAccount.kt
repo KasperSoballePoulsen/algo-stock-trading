@@ -15,7 +15,7 @@ import jakarta.persistence.Table
 @Table(name = "saxo_trading_accounts")
 class SaxoTradingAccount(
 
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.PERSIST])
     val saxoClient: SaxoClient,
 
     @Column(nullable = false)
