@@ -1,7 +1,7 @@
 package dk.ksp.algotrading.dto.response
 
 data class TraderDTO(
-    val userId: Long,
+    val id: Long,
     val username: String,
     val tradingAccount: TradingAccountDTO
 )

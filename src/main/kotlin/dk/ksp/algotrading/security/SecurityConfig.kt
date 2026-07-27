@@ -34,10 +34,6 @@ class SecurityConfig(
 
             httpBasic { }
 
-//            sessionManagement {
-////                sessionCreationPolicy = SessionCreationPolicy.STATELESS
-//                sessionCreationPolicy = SessionCreationPolicy.IF_REQUIRED
-//            }
         }
 
         return http.build()

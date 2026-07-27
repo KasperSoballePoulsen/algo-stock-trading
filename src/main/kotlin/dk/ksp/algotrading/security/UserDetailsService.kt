@@ -21,11 +21,6 @@ class UserDetailsService(
         val user = userRepository.findByUsername(username)
             ?: throw UsernameNotFoundException(username)
 
-//        logger.info(
-//            "Password matches: {}",
-//            BCryptPasswordEncoder(12).matches(initialPassword, user.passwordHash)
-//        )
-
         return UserDetails(
             id = user.id,
             username = user.username,

@@ -58,38 +58,6 @@ class StartupConfig(
         initializeTradingAccountIfMissing()
     }
 
-//    @Bean
-//    fun initTrader() = CommandLineRunner {
-//        if (!saxoTokenService.hasToken()) {
-//            logger.warn("Saxo has not been authorized. Open /api/saxo/oauth/login")
-//            return@CommandLineRunner
-//        }
-//
-//        if (tradingAccountRepository.count() == 0L) {
-//            logger.info("Initializing trader in database")
-//            val saxoClientDetails = saxoClient.getSaxoClient()
-//
-//            val initialOrderHistoryUrl =
-//                "$baseUrl/cs/v1/audit/orderactivities" +
-//                        "?\$top=200" +
-//                        "&EntryType=Last" +
-//                        "&ClientKey=${saxoClientDetails.clientKey}" +
-//                        "&AccountKey=${saxoClientDetails.defaultAccountKey}" +
-//                        "&FromDateTime=${Instant.now()}" // later FromDateTime should be now - 24h
-//
-//            tradingAccountRepository.save(
-//                TradingAccount.createWithTrader(
-//                    username = initialUsername,
-//                    passwordHash = passwordEncoder.encode(initialPassword),
-//                    saxoClientKey = saxoClientDetails.clientKey,
-//                    saxoAccountKey = saxoClientDetails.defaultAccountKey,
-//                    saxoAccountId = saxoClientDetails.defaultAccountId,
-//                    orderHistoryNextPollUrl = initialOrderHistoryUrl
-//                )
-//            )
-//        }
-//    }
-
     private fun initializeTradingAccountIfMissing() {
         if (saxoTradingAccountRepository.count() != 0L) {
             return

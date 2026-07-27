@@ -24,10 +24,6 @@ class SaxoTradingAccount(
     @Column(nullable = false, unique = true)
     val saxoAccountId: String,
 
-//    @OneToOne(cascade = [CascadeType.PERSIST])
-//    @JoinColumn(name = "user_id", nullable = false)
-//    val user: User,
-
     @Column(nullable = false)
     var orderHistoryNextPollUrl: String,
 
@@ -41,20 +37,4 @@ class SaxoTradingAccount(
         get() = requireNotNull(_id) {
             "Cannot access id of a TradingAccount that has not been persisted"
         }
-
-//    companion object {
-//        fun createWithTrader(
-//            username: String,
-//            passwordHash: String,
-//            saxoClientKey: String,
-//            saxoAccountKey: String,
-//            saxoAccountId: String,
-//            orderHistoryNextPollUrl: String
-//
-//        ): TradingAccount {
-//            val trader = Trader.createForAccount(username, passwordHash, saxoClientKey)
-//
-//            return TradingAccount(saxoAccountKey, saxoAccountId, trader, orderHistoryNextPollUrl)
-//        }
-//    }
 }
