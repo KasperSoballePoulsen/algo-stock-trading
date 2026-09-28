@@ -2,7 +2,7 @@ package dk.ksp.algotrading.service
 
 import dk.ksp.algotrading.dto.saxo.response.SaxoNetPosition
 import dk.ksp.algotrading.entity.Holding
-import dk.ksp.algotrading.entity.TradingAccount
+import dk.ksp.algotrading.entity.SaxoTradingAccount
 import dk.ksp.algotrading.mapper.toHoldings
 import dk.ksp.algotrading.repository.HoldingRepository
 import org.springframework.stereotype.Service
@@ -14,7 +14,7 @@ class HoldingService(
 ) {
     @Transactional
     fun replaceHoldings(
-        account: TradingAccount,
+        account: SaxoTradingAccount,
         saxoNetPositions: List<SaxoNetPosition>
     ): List<Holding> {
 

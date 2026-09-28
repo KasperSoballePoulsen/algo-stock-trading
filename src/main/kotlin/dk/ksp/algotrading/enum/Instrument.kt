@@ -5,8 +5,8 @@ enum class Instrument(
     val uic: Long
 ) {
     AAPL("AAPL", 211),
-    MSFT("MSFT", 27250),
-    TSLA("TSLA", 113),
+    MSFT("MSFT", 27250), //wrong uic?
+    TSLA("TSLA", 113), //wrong uic?
     NOVO("NOVO", 15629),
     NKT("NKT", 15567);
 

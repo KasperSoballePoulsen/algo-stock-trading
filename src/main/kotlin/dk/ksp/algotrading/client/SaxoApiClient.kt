@@ -25,7 +25,7 @@ import dk.ksp.algotrading.service.SaxoTokenService
 import org.springframework.web.util.UriComponentsBuilder
 
 @Component
-class SaxoClient(
+class SaxoApiClient(
     private val saxoTokenService: SaxoTokenService,
     @Value("\${saxo-sim-api.base-url}")
     private val baseUrl: String,

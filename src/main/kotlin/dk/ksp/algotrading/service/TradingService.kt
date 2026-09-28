@@ -1,6 +1,6 @@
 package dk.ksp.algotrading.service
 
-import dk.ksp.algotrading.client.SaxoClient
+import dk.ksp.algotrading.client.SaxoApiClient
 import dk.ksp.algotrading.dto.response.OrderDTO
 import dk.ksp.algotrading.dto.saxo.response.SaxoOrderEventDTO
 import dk.ksp.algotrading.entity.Order
@@ -13,18 +13,17 @@ import dk.ksp.algotrading.enum.OrderStatus
 import dk.ksp.algotrading.enum.OrderType
 import dk.ksp.algotrading.exception.BrokerRejectedException
 import dk.ksp.algotrading.repository.OrderRepository
-import dk.ksp.algotrading.repository.TradingAccountRepository
+import dk.ksp.algotrading.repository.SaxoTradingAccountRepository
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 
 @Service
 class TradingService(
-    private val tradingAccountRepository: TradingAccountRepository,
+    private val saxoTradingAccountRepository: SaxoTradingAccountRepository,
     private val orderRepository: OrderRepository,
-    private val saxoClient: SaxoClient,
+    private val saxoApiClient: SaxoApiClient,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -39,7 +38,7 @@ class TradingService(
         durationType: DurationType
     ): OrderDTO {
 
-        val tradingAccount = tradingAccountRepository.getTradingAccount()
+        val tradingAccount = saxoTradingAccountRepository.getTradingAccount()
 
         val normalizedSymbol = symbol.uppercase()
 
@@ -50,7 +49,7 @@ class TradingService(
         val uic = Instrument.fromSymbol(normalizedSymbol)
 
         return try {
-            val saxoOrder = saxoClient.sendOrder(
+            val saxoOrder = saxoApiClient.sendOrder(
                 saxoAccountKey = tradingAccount.saxoAccountKey,
                 amount = quantity,
                 buySell = buySell,
@@ -72,7 +71,7 @@ class TradingService(
                     saxoOrderId = saxoOrder.orderId,
                     status = createdStatus,
                     orderType = orderType,
-                    tradingAccount = tradingAccount,
+                    saxoTradingAccount = tradingAccount,
                     duration = durationType,
                 )
             )
@@ -87,7 +86,7 @@ class TradingService(
                     quantity = quantity,
                     status = OrderStatus.REJECTED,
                     orderType = orderType,
-                    tradingAccount = tradingAccount,
+                    saxoTradingAccount = tradingAccount,
                     duration = durationType
                 )
             )
@@ -139,7 +138,7 @@ class TradingService(
                     existingOrder.executedPrice = it
                 }
             } else {
-                val account = tradingAccountRepository.findBySaxoAccountId(orderEvent.accountId)
+                val account = saxoTradingAccountRepository.findBySaxoAccountId(orderEvent.accountId)
                     ?: throw IllegalStateException(
                         "No trading account found for Saxo accountId=${orderEvent.accountId}"
                     )
@@ -155,7 +154,7 @@ class TradingService(
                         duration = DurationType.fromSaxoValue(orderEvent.duration.durationType),
                         status = OrderStatus.fromSaxoValue(orderEvent.status),
                         orderType = OrderType.fromSaxoValue(orderEvent.orderType),
-                        tradingAccount = account
+                        saxoTradingAccount = account
                     )
                 )
             }
